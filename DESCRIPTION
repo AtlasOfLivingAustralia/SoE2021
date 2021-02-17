@@ -1,0 +1,22 @@
+Package: SoE2021
+Type: Package
+Title: Package to build SoE visualisations and associated Shiny app
+Version: 1.0.0
+Authors@R: c(person("Martin", "Westgate", email="martin.westgate@csiro.au", role=c("aut","cre")),
+  person("Matilda", "Stevenson", email="matilda.stevenson@csiro.au",role="aut"))
+Description: Build shiny app for visualising ALA data
+Imports:
+  shiny,
+  galah,
+  sf,
+  ggplot2,
+  viridis
+License: MIT
+URL: https://github.com/AtlasOfLivingAustralia/SoE2021
+BugReports: https://github.com/AtlasOfLivingAustralia/SoE2021/issues
+Maintainer: Martin Westgate <martin.westgate@csiro.au>
+LazyLoad: yes
+LazyData: yes
+VignetteBuilder: knitr
+RoxygenNote: 7.1.1
+Encoding: UTF-8
