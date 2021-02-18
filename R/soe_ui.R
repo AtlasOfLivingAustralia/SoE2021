@@ -19,20 +19,43 @@ soe_ui <- function(){
             "Number of species" = "n_species"),
           width = "250px"),
         selectInput(
-          inputId = "taxa_shown",
-          label = "Taxonomic breakdown:",
-          choices = c(
-            "All species",
-            "Show individual taxa"),
-          width = "250px"),
-        # note: may need reactive UI to show a checkboxGroupInput of taxa to include
-        selectInput(
           inputId = "plot_type",
           label = "Plot type:",
           choices = c(
             "Map",
             "Heatmap",
             "Barchart"),
+          width = "250px"),
+        # breakdown section
+        hr(),
+        selectInput(
+          inputId = "taxa",
+          label = "Taxonomic breakdown:",
+          choices = c(
+            "All species" = "all",
+            "Mammals" = "mammalia",
+            "Birds" = "aves",
+            "Reptiles" = "reptilia",
+            "Frogs" = "amphibia",
+            "Fishes" = "actinopterygii",
+            "Insects" = "insecta",
+            "Plants" = "plantae"
+          ),
+          width = "250px"),
+        # note: may need reactive UI to show a checkboxGroupInput of taxa to include
+        selectInput(
+          inputId = "spatial",
+          label = "Spatial Breakdown:",
+          choices = c(
+            "None" = "all",
+            "IBRA Regions" = "ibra"),
+          width = "250px"),
+        selectInput(
+          inputId = "temporal",
+          label = "Temporal Breakdown:",
+          choices = c(
+            "None" = "all",
+            "5-Year Increments" = "increments"),
           width = "250px"),
         # colors
         hr(),
