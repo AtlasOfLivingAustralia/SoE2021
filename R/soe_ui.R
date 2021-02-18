@@ -1,13 +1,13 @@
 #' Build UI for shiny app
 #'
-#' @importFrom shiny navbarPage sidebarLayout sidebarPanel titlePanel fluidRow
-#' selectInput plotOutput downloadButton
+#' @importFrom shiny fluidPage titlePanel sidebarLayout sidebarPanel mainPanel
+#' selectInput plotOutput downloadButton checkboxInput
 #' @importFrom bslib bs_theme
 
-
 soe_ui <- function(){
-  navbarPage(
-    "State of the Environment 2021 | example data from ALA",
+  fluidPage(
+    titlePanel("State of the Environment 2021 | example data from ALA"),
+    br(),
     theme = bs_theme(version = 4, bootswatch = "minty"),
     sidebarLayout(
       sidebarPanel(
@@ -24,11 +24,10 @@ soe_ui <- function(){
           )
         )
       ),
+          # if "map", map by IBRA regions only for now
+          # could choose to show a spatial heatmap by hex too
       mainPanel(
-        fluidRow(
-          plotOutput(outputId = "chart_space", width = "100%", height = "75vh"),
-          downloadButton("save_chart")
-        )
+        plotOutput(outputId = "chart_space", width = "100%", height = "75vh")
       )
     )
   )

@@ -23,7 +23,7 @@ build_soe_app <- function(
   saveRDS(
     list(
       server = soe_server,
-      ui = soe_ui(),
+      ui = soe_ui,
       data = app_data),
     file = paste0("./", name, "/data/app.rds"))
 
