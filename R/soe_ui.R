@@ -6,7 +6,7 @@
 
 soe_ui <- function(){
   fluidPage(
-    titlePanel("State of the Environment 2021 | example data from ALA"),
+    titlePanel("State of the Environment 2021"),
     br(),
     theme = bs_theme(version = 4, bootswatch = "minty"),
     sidebarLayout(
@@ -49,6 +49,7 @@ soe_ui <- function(){
           choices = c(
             "None" = "all",
             "IBRA Regions" = "ibra"),
+          selected = "ibra",
           width = "250px"),
         selectInput(
           inputId = "temporal",
@@ -56,6 +57,10 @@ soe_ui <- function(){
           choices = c(
             "None" = "all",
             "5-Year Increments" = "increments"),
+          width = "250px"),
+        actionButton(
+          inputId = "calculate",
+          label = "Calculate",
           width = "250px"),
         # colors
         hr(),
@@ -77,6 +82,10 @@ soe_ui <- function(){
           inputId = "log_scale",
           label = "Log scale",
           value = FALSE),
+        actionButton(
+          inputId = "redraw",
+          label = "Redraw",
+          width = "250px"),
         # download options
         hr(),
         selectInput(
@@ -87,7 +96,10 @@ soe_ui <- function(){
             "png",
             "jpeg"),
           width = "250px"),
-        downloadButton("plot_download", "Save plot")
+        downloadButton(
+          outputId = "plot_download",
+          label = "Save plot",
+          width = "250px")
       ),
           # if "map", map by IBRA regions only for now
           # could choose to show a spatial heatmap by hex too

@@ -2,7 +2,7 @@
 #'
 #' Primarily internal function for getting data in correct format
 #'
-#' @importFrom galah ala_counts
+#' @importFrom galah ala_counts select_taxa select_filters
 #' @export get_soe_data
 
 get_soe_data <- function(
@@ -16,7 +16,7 @@ get_soe_data <- function(
     if(taxa == "all"){
       new_data <- ala_counts(group_by = "cl1048")
     }else{
-      new_data <- ala_counts(taxon = select_taxa(taxa), group_by = "cl1048")
+      new_data <- ala_counts(taxa = select_taxa(taxa), group_by = "cl1048")
     }
     data_out <- merge(ibra_map, new_data,
       by.x = "REG_NAME_7",
@@ -26,7 +26,7 @@ get_soe_data <- function(
     if(taxa == "all"){
       data_out <- ala_counts()
     }else{ # i.e. specific taxon
-      data_out <- ala_counts(taxon = select_taxa(taxa))
+      data_out <- ala_counts(taxa = select_taxa(taxa))
     }
   }
   return(data_out)

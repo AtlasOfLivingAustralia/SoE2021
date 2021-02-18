@@ -11,17 +11,8 @@ soe_server <- function(input, output, session){
     data = NULL,
     plot = NULL)
 
-  observeEvent({
-    # what info to get:
-    # input$count_type
-    input$taxa
-    input$spatial
-    # input$temporal
-    # how to present this info:
-    input$plot_type
-    input$color_scheme
-    input$reverse_colours
-  },{
+  observeEvent(input$calculate, {
+    calculating_modal()
     internal_info$data <- get_soe_data(
       # type = input$count_type,
       taxa = input$taxa,
@@ -32,19 +23,28 @@ soe_server <- function(input, output, session){
       data = internal_info$data,
       # type = input$plot_type # not yet implemented
       palette = input$color_scheme,
-      reverse_colours = input$color_reverse
+      reverse_colours = input$color_reverse,
+      log_scale = input$log_scale
+    )
+    removeModal()
+  })
+
+  # change color scheme but not raw data
+  observeEvent(input$redraw, {
+    internal_info$plot <- draw_soe_plot(
+      data = internal_info$data,
+      # type = input$plot_type # not yet implemented
+      palette = input$color_scheme,
+      reverse_colours = input$color_reverse,
+      log_scale = input$log_scale
     )
   })
 
   # render the requested plot
   output$chart_space <- renderPlot({
-    # if(!is.null(internal_info$plot)){
-    #   internal_info$plot
-    # }
-    ggplot(ibra_map) +
-      geom_sf() +
-      lims(x = c(110, 155), y = c(-45, -10)) +
-      theme_bw()
+    if(!is.null(internal_info$data)){
+      print(internal_info$plot)
+    }
   })
 
   # download handler
