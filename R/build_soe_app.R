@@ -2,9 +2,13 @@
 #'
 #' This function builds an app in the users' workspace
 #'
+#' @importFrom shiny runApp
 #' @export build_soe_app
 
-build_soe_app <- function(name = "test_app"){
+build_soe_app <- function(
+  name = "test_app",
+  launch = TRUE
+){
 
   app_data <- list(
     ibra = "ibra"#ibra_map
@@ -18,7 +22,7 @@ build_soe_app <- function(name = "test_app"){
   dir.create(paste0(name, "/data"))
   saveRDS(
     list(
-      server = soe_server(),
+      server = soe_server,
       ui = soe_ui(),
       data = app_data),
     file = paste0("./", name, "/data/app.rds"))
@@ -35,5 +39,7 @@ build_soe_app <- function(name = "test_app"){
     row.names = FALSE,
     col.names = FALSE
   )
+
+  if(launch){runApp(name)}
 
 }
