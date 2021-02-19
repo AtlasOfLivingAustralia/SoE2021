@@ -10,7 +10,8 @@ draw_soe_plot <- function(
   data, # returned by get_soe_data()
   palette,
   reverse_colours = FALSE,
-  log_scale = FALSE
+  log_scale = FALSE,
+  count_type
 ){
   if(reverse_colours){
     viridis_direction <- (-1)
@@ -30,7 +31,8 @@ draw_soe_plot <- function(
     lims(x = c(110, 155), y = c(-45, -10)) +
     scale_fill_viridis(
       option = palette,
-      direction = viridis_direction) +
+      direction = viridis_direction,
+      name = leg_title(count_type, log_scale)) +
       # trans = transform_value) +
     theme_bw()
 
@@ -40,4 +42,11 @@ draw_soe_plot <- function(
 
 log_fun <- function(x, log){
   if(log){log(x + 1)}else{x}
+}
+
+leg_title <- function(type, log) {
+  if (type == "record"){ type <- "records"}
+  txt <- paste0("Number of ", type)
+  if (log) { txt <- paste0("Log(", txt, ")")}
+  txt
 }
