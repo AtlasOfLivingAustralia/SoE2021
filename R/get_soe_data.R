@@ -14,9 +14,9 @@ get_soe_data <- function(
   # get examples for counts
   if(spatial == "ibra"){
     if(taxa == "all"){
-      new_data <- ala_counts(group_by = "cl1048")
+      new_data <- ala_counts(group_by = "cl1048", type = type)
     }else{
-      new_data <- ala_counts(taxa = select_taxa(taxa), group_by = "cl1048")
+      new_data <- ala_counts(taxa = select_taxa(taxa), group_by = "cl1048", type = type)
     }
     data_out <- merge(ibra_map, new_data,
       by.x = "REG_NAME_7",
@@ -24,11 +24,12 @@ get_soe_data <- function(
       all = TRUE)
   }else{ # i.e. no spatial aspect
     if(taxa == "all"){
-      data_out <- ala_counts()
+      data_out <- ala_counts(type = type)
     }else{ # i.e. specific taxon
-      data_out <- ala_counts(taxa = select_taxa(taxa))
+      data_out <- ala_counts(taxa = select_taxa(taxa), type = type)
     }
   }
+  Sys.sleep(1)
   return(data_out)
 }
 # test <- get_soe_data(spatial = "ibra", taxa = "all")

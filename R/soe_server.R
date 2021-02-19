@@ -14,7 +14,7 @@ soe_server <- function(input, output, session){
   observeEvent(input$calculate, {
     calculating_modal()
     internal_info$data <- get_soe_data(
-      # type = input$count_type,
+      type = input$count_type,
       taxa = input$taxa,
       spatial = input$spatial
       # temporal = input$temporal
@@ -24,7 +24,8 @@ soe_server <- function(input, output, session){
       # type = input$plot_type # not yet implemented
       palette = input$color_scheme,
       reverse_colours = input$color_reverse,
-      log_scale = input$log_scale
+      log_scale = input$log_scale,
+      count_type = input$count_type
     )
     removeModal()
   })
@@ -36,7 +37,8 @@ soe_server <- function(input, output, session){
       # type = input$plot_type # not yet implemented
       palette = input$color_scheme,
       reverse_colours = input$color_reverse,
-      log_scale = input$log_scale
+      log_scale = input$log_scale,
+      count_type = input$count_type
     )
   })
 

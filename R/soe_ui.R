@@ -15,8 +15,8 @@ soe_ui <- function(){
           inputId = "count_type",
           label = "Show data on:",
           choices = c(
-            "Number of records" = "n_records",
-            "Number of species" = "n_species"),
+            "Number of records" = "record",
+            "Number of species" = "species"),
           width = "250px"),
         selectInput(
           inputId = "plot_type",
