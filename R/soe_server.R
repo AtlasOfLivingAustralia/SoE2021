@@ -3,9 +3,11 @@
 #' Server stuff goes here
 #'
 #' @importFrom shiny observeEvent reactiveValues renderPlot
+#' @importFrom galah ala_config
 
 soe_server <- function(input, output, session){
-
+  ala_config(caching = TRUE, cache_directory = '../data/galah_data',
+             verbose = TRUE)
   # save reactive objects
   internal_info <- reactiveValues(
     data = NULL,
