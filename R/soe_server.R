@@ -7,8 +7,8 @@
 
 soe_server <- function(input, output, session){
   #dir.create('galah_data')
-  ala_config(caching = TRUE, cache_directory = 'galah_data/',
-             verbose = TRUE)
+  #ala_config(caching = TRUE, cache_directory = 'galah_data/',
+  #           verbose = TRUE)
   # save reactive objects
   internal_info <- reactiveValues(
     data = NULL,
