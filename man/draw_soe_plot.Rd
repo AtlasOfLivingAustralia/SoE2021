@@ -4,7 +4,13 @@
 \alias{draw_soe_plot}
 \title{draw a plot}
 \usage{
-draw_soe_plot(data, palette, reverse_colours = FALSE, log_scale = FALSE)
+draw_soe_plot(
+  data,
+  palette,
+  reverse_colours = FALSE,
+  log_scale = FALSE,
+  count_type
+)
 }
 \description{
 Internal function called by SoE app

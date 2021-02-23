@@ -3,6 +3,7 @@
 #' This function builds an app in the users' workspace
 #'
 #' @importFrom shiny runApp
+#' @importFrom galah select_taxa select_filters ala_counts
 #' @export build_soe_app
 
 build_soe_app <- function(
@@ -10,11 +11,13 @@ build_soe_app <- function(
   launch = TRUE
 ){
 
+  # store data in a single place
   app_data <- list(
-    ibra = "ibra"#ibra_map
-    # other info goes here
-  )
+    ibra = "ibra", # note internal data are quoted - for some reason this works
+    lookup = "lookup_df",
+    counts = "data_list")
 
+  # build app file structure
   if(dir.exists(name)) {
     unlink(name, recursive = TRUE)
   }

@@ -15,7 +15,7 @@ soe_server <- function(input, output, session){
     plot = NULL)
 
   observeEvent(input$calculate, {
-    calculating_modal()
+    # calculating_modal()
     internal_info$data <- get_soe_data(
       type = input$count_type,
       taxa = input$taxa,
@@ -30,7 +30,7 @@ soe_server <- function(input, output, session){
       log_scale = input$log_scale,
       count_type = input$count_type
     )
-    removeModal()
+    # removeModal()
   })
 
   # change color scheme but not raw data
