@@ -8,7 +8,7 @@ soe_ui <- function(){
   fluidPage(
     titlePanel("State of the Environment 2021"),
     br(),
-    theme = bs_theme(version = 4, bootswatch = "minty"),
+    theme = bs_theme(version = 4, bootswatch = "minty", secondary = "#F26649"),
     sidebarLayout(
       sidebarPanel(
         selectInput(
