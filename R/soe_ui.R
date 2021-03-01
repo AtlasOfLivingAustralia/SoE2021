@@ -1,111 +1,193 @@
 #' Build UI for shiny app
 #'
 #' @importFrom shiny fluidPage titlePanel sidebarLayout sidebarPanel mainPanel
-#' selectInput plotOutput downloadButton checkboxInput
+#' selectInput plotOutput downloadButton checkboxInput tabPanel
 #' @importFrom bslib bs_theme
 
 soe_ui <- function(){
   fluidPage(
     titlePanel("State of the Environment 2021"),
-    br(),
     theme = bs_theme(version = 4, bootswatch = "minty", secondary = "#F26649"),
-    sidebarLayout(
-      sidebarPanel(
-        selectInput(
-          inputId = "count_type",
-          label = "Show data on:",
-          choices = c(
-            "Number of records" = "record",
-            "Number of species" = "species"),
-          width = "250px"),
-        selectInput(
-          inputId = "plot_type",
-          label = "Plot type:",
-          choices = c(
-            "Map",
-            "Heatmap",
-            "Barchart"),
-          width = "250px"),
-        # breakdown section
-        hr(),
-        selectInput(
-          inputId = "taxa",
-          label = "Taxonomic breakdown:",
-          choices = c(
-            "All species" = "all",
-            "Mammals" = "mammalia",
-            "Birds" = "aves",
-            "Reptiles" = "reptilia",
-            "Frogs" = "amphibia",
-            "Fishes" = "actinopterygii",
-            "Insects" = "insecta",
-            "Plants" = "plantae"
+    tabsetPanel(type = "pills",
+      tabPanel("Time Series",
+        br(),
+        sidebarLayout(
+          sidebarPanel(
+            # y
+            selectInput(
+              inputId = "time_y",
+              label = "Y Axis:",
+              choices = c(
+                "Number of records" = "record",
+                "Number of species" = "species")),
+            checkboxInput(
+              inputId = "log_scale",
+              label = "Log scale",
+              value = FALSE),
+            # size
+            selectInput(
+              inputId = "time_size",
+              label = "Size:",
+              choices = c(
+                "Number of records" = "record",
+                "Number of species" = "species")),
+            # color
+            selectInput(
+              inputId = "time_color",
+              label = "Colour:",
+              choices = c(
+                "None" = "none",
+                "Year" = "year",
+                "Taxon" = "taxon",
+                "Threatened Status" = "threatened",
+                "States" = "states",
+                "IBRA Regions" = "ibra"),
+              selected = "none"),
+            # facet
+            selectInput(
+              inputId = "time_facet",
+              label = "Facet:",
+              choices = c(
+                "None" = "none",
+                "Year" = "year",
+                "Taxon" = "taxon",
+                "Threatened Status" = "threatened",
+                "States" = "states",
+                "IBRA Regions" = "ibra"),
+              selected = "none"),
+            add_color_options(),
+            hr(),
+            actionButton(
+              inputId = "download_modal",
+              label = "Download",
+              width = "100%")
           ),
-          width = "250px"),
-        # note: may need reactive UI to show a checkboxGroupInput of taxa to include
-        selectInput(
-          inputId = "spatial",
-          label = "Spatial Breakdown:",
-          choices = c(
-            "None" = "all",
-            "IBRA Regions" = "ibra"),
-          selected = "ibra",
-          width = "250px"),
-        selectInput(
-          inputId = "temporal",
-          label = "Temporal Breakdown:",
-          choices = c(
-            "None" = "all",
-            "5-Year Increments" = "increments"),
-          width = "250px"),
-        actionButton(
-          inputId = "calculate",
-          label = "Calculate",
-          width = "250px"),
-        # colors
-        hr(),
-        selectInput(
-          inputId = "color_scheme",
-          label = "Colour scheme:",
-          choices = c(
-            "viridis",
-            "magma",
-            "inferno",
-            "plasma",
-            "cividis"),
-          width = "250px"),
-        checkboxInput(
-          inputId = "color_reverse",
-          label = "Reverse colors",
-          value = FALSE),
-        checkboxInput(
-          inputId = "log_scale",
-          label = "Log scale",
-          value = FALSE),
-        actionButton(
-          inputId = "redraw",
-          label = "Redraw",
-          width = "250px"),
-        # download options
-        hr(),
-        selectInput(
-          inputId = "download_type",
-          label = "Download format:",
-          choices = c(
-            "pdf",
-            "png",
-            "jpeg"),
-          width = "250px"),
-        downloadButton(
-          outputId = "plot_download",
-          label = "Save plot",
-          width = "250px")
+          mainPanel(
+            plotOutput(outputId = "chart_space", width = "100%", height = "75vh")
+          )
+        )
       ),
-          # if "map", map by IBRA regions only for now
-          # could choose to show a spatial heatmap by hex too
-      mainPanel(
-        plotOutput(outputId = "chart_space", width = "100%", height = "75vh")
+      tabPanel("Heatmap",
+        br(),
+        sidebarLayout(
+          sidebarPanel(
+            selectInput(
+              inputId = "heatmap_x",
+              label = "X Axis:",
+              choices = c(
+                "Year" = "year",
+                "Taxon" = "taxon",
+                "Threatened Status" = "threatened",
+                "States" = "states",
+                "IBRA Regions" = "ibra"),
+              selected = "states"),
+            selectInput(
+              inputId = "heatmap_y",
+              label = "Y Axis:",
+              choices = c(
+                "Year" = "year",
+                "Taxon" = "taxon",
+                "Threatened Status" = "threatened",
+                "States" = "states",
+                "IBRA Regions" = "ibra"),
+              selected = "taxon"),
+            selectInput(
+              inputId = "heatmap_z",
+              label = "Z axis:",
+              choices = c(
+                "Number of records" = "record",
+                "Number of species" = "species")),
+            checkboxInput(
+              inputId = "log_scale",
+              label = "Log scale",
+              value = FALSE),
+            selectInput(
+              inputId = "heatmap_facet",
+              label = "Facets:",
+              choices = c(
+                "None" = "none",
+                "Taxon" = "taxon",
+                "Year" = "year",
+                "Threatened Status" = "threatened"),
+              selected = "none"),
+            add_color_options(),
+            hr(),
+            actionButton(
+              inputId = "download_modal",
+              label = "Download",
+              width = "100%")
+          ),
+          mainPanel(
+            plotOutput(outputId = "chart_space", width = "100%", height = "75vh")
+          )
+        )
+      ),
+      tabPanel("Map",
+        br(),
+        sidebarLayout(
+          sidebarPanel(
+            selectInput(
+              inputId = "count_type",
+              label = "Counts:",
+              choices = c(
+                "Number of records" = "record",
+                "Number of species" = "species")),
+            checkboxInput(
+              inputId = "log_scale",
+              label = "Log scale",
+              value = FALSE),
+            selectInput(
+              inputId = "map_spatial",
+              label = "Regions:",
+              choices = c(
+                "States" = "states",
+                "IBRA Regions" = "ibra"),
+              selected = "states"),
+            selectInput(
+              inputId = "map_facet",
+              label = "Facets:",
+              choices = c(
+                "None" = "none",
+                "Taxon" = "taxon",
+                "Year" = "year",
+                "Threatened Status" = "threatened"),
+              selected = "none"),
+            add_color_options(),
+            hr(),
+            actionButton(
+              inputId = "download_modal",
+              label = "Download",
+              width = "100%")
+          ),
+          mainPanel(
+            plotOutput(outputId = "chart_space", width = "100%", height = "75vh")
+          )
+        )
       )
     )
+  )
+}
+
+
+add_color_options <- function(){
+  list(
+    selectInput(
+      inputId = "color_scheme",
+      label = "Colour scheme:",
+      choices = c(
+        "viridis",
+        "magma",
+        "inferno",
+        "plasma",
+        "cividis"),
+      width = "100%"),
+    checkboxInput(
+      inputId = "color_reverse",
+      label = "Reverse colors",
+      value = FALSE),
+    actionButton(
+      inputId = "redraw",
+      label = "Redraw",
+      width = "100%")
   )
 }
