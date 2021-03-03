@@ -112,13 +112,7 @@ crosstab_ala_data <- function(files){
   # classify by threatened status
   # NOT ACHIEVED YET
 
-
-  ## BUT SPECIES NUMBERS DON'T SUM
-  # so we need to revert to our earlier attempt
-  # i.e. create every unique cobination of of entries as a list
-  # this isn't strictly necessary for record counts, but could save time
-
-  # fortunately, we can still get n_spp and n_rec at same time
+  # determine which columns you want to cross-tabulate
   crosstab_columns <- c(
     "year_group",
     "taxon",
@@ -142,9 +136,7 @@ crosstab_ala_data <- function(files){
   # the above is in list format, which is useful for data extraction
   # BUT we also need a data.frame version to act as a lookup table inside the app
 
-  # now we can use xtabs to get all the information at once
-  # below intended to be passed to lapply
-  # a <- combination_list[[9]] # for testing purposes
+  # use lapply to get crosstabs for all combinations of data that we are interested in
   xtab_list <- lapply(combination_list[1:3], function(a){
 
     # determine all levels of factors in the variables included this time
@@ -184,123 +176,6 @@ crosstab_ala_data <- function(files){
 
   }) # end lapply
 
-
+  # last stage is to export xtab list and a corresponding index data.frame
 
 }
-
-# OLD crosstab code
-# xtab_list <- lapply(combination_list, function(a){
-
-  # crosstab for counts
-  # formula_counts <- formula(paste0(" ~ ", paste(a, collapse = " + ")))
-  # crosstab_counts <- as.data.frame(xtabs(formula_counts, data = data_in))
-  # colnames(crosstab_counts)[ncol(crosstab_counts)] <- "n_records"
-
-  # and then species
-  # first crosstab gets record count by species + other vars
-    # formula_species <- formula(paste0(" ~ species_guid + ", paste(a, collapse = " + ")))
-  # crosstab_species <- as.data.frame(xtabs(
-  #   # formula_species,
-  #   formula(paste0(" ~ species_guid + ", paste(a, collapse = " + "))),
-  #   data = data_in[data_in$species_guid != "", ]),
-  #   stringsAsFactors = FALSE)
-  # crosstab_species <- crosstab_species[
-  #   crosstab_species$Freq > 0,
-  #   colnames(crosstab_species) != "Freq"]
-  # # second cross-tab gets rows (= species) with more >1 occurrence
-  # crosstab_spp <- as.data.frame(xtabs(
-  #   formula(paste0("~ ", paste(a, collapse = " + "))),
-  #   data = crosstab_species),
-  #   stringsAsFactors = FALSE)
-  # colnames(crosstab_spp)[ncol(crosstab_spp)] <- "n_spp"
-  # the above works for small datasets, but exhausts memory for large
-
-  # merge counts of records and species
-  # result <- merge(crosstab_counts, crosstab_spp) # merge on all shared columns
-#
-#   return(result_df)
-#
-# }) # end lapply
-
-
-
-
-# OLD species counting code
-# crosstab_counts$n_spp <- unlist(lapply(
-#   split(
-#     crosstab_counts[, -ncol(crosstab_counts)],
-#     seq_len(nrow(crosstab_counts))),
-#   function(b){
-#     # get one column of logicals per column of entry
-#     logical_list <- lapply(seq_len(ncol(b)), function(x){
-#       data_in[[colnames(b)[[x]]]] == as.character(b[, 1])
-#     })
-#     # check for matches across all columns
-#     if(ncol(b) > 1){
-#       lookup <- apply(logical_list, 1, all)
-#     }else{
-#       lookup <- logical_list[[1]]
-#     }
-#     # extract species, get count
-#     result <- length(unique(data_in$species_guid[lookup]))
-#     return(result)
-#   }
-# ))
-
-# OLD CODE for downloading data from ALA
-# create a data.frame with every combination of variables
-# lookup_df <- expand.grid(
-#   taxon = c(
-#     "all",
-#     "mammalia",
-#     "aves",
-#     "reptilia",
-#     "amphibia",
-#     "actinopterygii",
-#     "insecta",
-#     "plantae"),
-#   year_start = c(9999, seq(1971, 2016, by = 5)),
-#   ibra = c(FALSE, TRUE),
-#   type = c("record", "species"),
-#   stringsAsFactors = FALSE)
-# lookup_df$taxon_id <- c(
-#   NA,
-#   select_taxa(c(
-#     "mammalia",
-#     "aves",
-#     "reptilia",
-#     "amphibia",
-#     "actinopterygii",
-#     "insecta",
-#     "plantae"))$taxon_concept_id)
-# save(lookup_df, file = "lookup_df.RData")
-#
-# data_list <- lapply(
-#   split(lookup_df, seq_len(nrow(lookup_df))),
-#   function(a){
-#     if(a$taxon == "all"){
-#       taxon <- NULL
-#     }else{
-#       taxon <- a$taxon_id
-#     }
-#     if(a$year_start == 9999){
-#       filter <- NULL
-#     }else{
-#       filter <- select_filters(
-#         year = seq(a$year_start, a$year_start + 4, 1))
-#     }
-#     if(a$ibra){
-#       result <- ala_counts(
-#         taxa = taxon,
-#         filters = filter,
-#         group_by = "cl1048",
-#         type = a$type)
-#     }else{
-#       result <- ala_counts(
-#         taxa = taxon,
-#         filters = filter,
-#         type = a$type)
-#     }
-#   return(result)
-# })
-# save(data_list, file = "data_list.RData")
