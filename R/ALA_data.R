@@ -3,6 +3,7 @@
 #' @title ALA data
 #' @name lookup_df
 #' @name data_list
+#' @importFrom parallel mcapply detectCores
 #' @export build_ala_data
 
 
@@ -62,11 +63,14 @@ get_ala_data <- function(){
 # "Australian Capital Territory" it loaded data, even though a$full_name == NSW
 
 # process data
-file <- "./cache/ACT.rds"
-crosstab_ala_data <- function(file){
+files <- paste0("./cache/",
+  c("ACT", "NSW", "NT", "QLD", "SA", "TAS", "VIC", "WA"),
+  ".rds")
+
+crosstab_ala_data <- function(files){
 
   # import
-  data_in <- readRDS(file)
+  data_in <- do.call(rbind, lapply(files, function(a){readRDS(a)}))
 
   # set up which taxonomic groups to keep
   data_in$taxon <- NA
@@ -77,7 +81,24 @@ crosstab_ala_data <- function(file){
   data_in$taxon[which(data_in$kingdom == "Fungi")] <- "Fungi"
   data_in$taxon[is.na(data_in$taxon)] <- "Other"
 
-  # classify by threatened status
+  # classify by year
+  year_start <- seq(1971, 2016, 5)
+  data_in$year_group <- NA
+  # lapply(
+  for(a in seq_along(year_start)){
+    # function(a){
+      data_in$year_group[
+        which(
+          data_in$year >= year_start[a] & data_in$year < (year_start[a] + 5)
+        )] <- a
+    }# )
+  # xtabs(~data_in$year_group)
+  data_in$year_group <- factor(
+    data_in$year_group,
+    levels = seq_along(year_start),
+    labels = paste(year_start, year_start + 4, sep = "-"))
+  # test this
+  # xtabs(~ year + year_group, data = data_in)
 
   # get national parks information
   data_in$national_parks <- factor(
@@ -88,60 +109,121 @@ crosstab_ala_data <- function(file){
   # determine which basis of record to keep (i.e. any 'other' group?)
   data_in$basisOfRecord[data_in$basisOfRecord == ""] <- "Not Recorded"
 
-  # classify by year
-
-  # crosstabulate by IBRA region
-
-  # crosstabulate by state
-
-  # rbind
-
-  # export
+  # classify by threatened status
+  # NOT ACHIEVED YET
 
 
   ## BUT SPECIES NUMBERS DON'T SUM
   # so we need to revert to our earlier attempt
   # i.e. create every unique cobination of of entries as a list
-  # this isn't strinctly necessary for record counts, but could save time
+  # this isn't strictly necessary for record counts, but could save time
 
   # fortunately, we can still get n_spp and n_rec at same time
-  crosstab_columns <- c("taxon",
+  crosstab_columns <- c(
+    "year_group",
+    "taxon",
     "basisOfRecord",
-    "australianStatesAndTerritories", "iBRA7Regions", "national_parks")
+    # "threatened_status",
+    "australianStatesAndTerritories",
+    "iBRA7Regions",
+    "national_parks")
+
+  # save progress
+  # saveRDS(
+    # data_in[, c("species_guid", crosstab_columns)],
+    # "./cache/alldata.rds")
+  # NOTE: This takes ages due to large file size
+
   combination_list <- do.call(c,
     lapply(
-      seq_along(crosstab_columns),
+      seq_len(4), # maximum number of combinations
+      # seq_along(crosstab_columns),
       function(a){combn(crosstab_columns, a, simplify = FALSE)}))
+  # the above is in list format, which is useful for data extraction
+  # BUT we also need a data.frame version to act as a lookup table inside the app
 
-
+  # now we can use xtabs to get all the information at once
   # below intended to be passed to lapply
-  a <- combination_list[[9]] # for testing purposes
-  formula_counts <- formula(paste0(" ~ ", paste(a, collapse = " + ")))
-  crosstab_counts <- as.data.frame(xtabs(formula_counts, data = data_in))
-  colnames(crosstab_counts)[ncol(crosstab_counts)] <- "n_records"
+  # a <- combination_list[[9]] # for testing purposes
+  xtab_list <- lapply(combination_list[1:3], function(a){
 
-  # and species
-  # frist crosstab gets record count by species + other vars
-  formula_species <- formula(paste0(" ~ species_guid + ", paste(a, collapse = " + ")))
-  crosstab_species <- as.data.frame(
-    xtabs(formula_species,
-      data = data_in[data_in$species_guid != "", ]),
-    stringsAsFactors = FALSE)
-  crosstab_species <- crosstab_species[
-    crosstab_species$Freq > 0,
-    colnames(crosstab_species) != "Freq"]
-  # second cross-tab gets rows (=species) with more than one occurrence
-  crosstab_spp <- as.data.frame(xtabs(
-    formula(paste0("~ ", paste(a, collapse = " + "))),
-    data = crosstab_species))
-  colnames(crosstab_spp)[ncol(crosstab_spp)] <- "n_spp"
+    # determine all levels of factors in the variables included this time
+    unique_list <- lapply(data_in[, a], unique)
 
-  # merge counts of records and species
-  result <- merge(crosstab_counts, crosstab_spp) # merge on all shared columns
-  return(result)
-  # end lapply
+    # convert into a data.frame showing every unique combination
+    result_df <- as.data.frame(
+      lapply(expand.grid(unique_list), function(a){as.character(a)}))
+
+    # for every combination of variable levels, calculate the number of
+    # records and species
+    result_list <- mclapply(
+      split(result_df, seq_len(nrow(result_df))),
+      function(b){
+        logical_tr <- eval(str2expression(
+            paste(
+              paste0(
+                "data_in$",
+                paste(colnames(b),
+                  paste0("'", b[1, ], "'"),
+                  sep = " == ")),
+              collapse = " & ")
+        ))
+        # return two numbers
+        # n_records <- length(which(logical_tr))
+        # if(n_records > 0){}else{}
+        return(c(
+          n_records = length(which(logical_tr)),
+          n_spp = length(which(unique(data_in$species_guid[logical_tr]) != ""))
+        ))
+      },
+      mc.cores = detectCores() - 1)
+
+    result_df <- cbind(result_df, do.call(rbind, result_list))
+
+    return(result_df)
+
+  }) # end lapply
+
+
 
 }
+
+# OLD crosstab code
+# xtab_list <- lapply(combination_list, function(a){
+
+  # crosstab for counts
+  # formula_counts <- formula(paste0(" ~ ", paste(a, collapse = " + ")))
+  # crosstab_counts <- as.data.frame(xtabs(formula_counts, data = data_in))
+  # colnames(crosstab_counts)[ncol(crosstab_counts)] <- "n_records"
+
+  # and then species
+  # first crosstab gets record count by species + other vars
+    # formula_species <- formula(paste0(" ~ species_guid + ", paste(a, collapse = " + ")))
+  # crosstab_species <- as.data.frame(xtabs(
+  #   # formula_species,
+  #   formula(paste0(" ~ species_guid + ", paste(a, collapse = " + "))),
+  #   data = data_in[data_in$species_guid != "", ]),
+  #   stringsAsFactors = FALSE)
+  # crosstab_species <- crosstab_species[
+  #   crosstab_species$Freq > 0,
+  #   colnames(crosstab_species) != "Freq"]
+  # # second cross-tab gets rows (= species) with more >1 occurrence
+  # crosstab_spp <- as.data.frame(xtabs(
+  #   formula(paste0("~ ", paste(a, collapse = " + "))),
+  #   data = crosstab_species),
+  #   stringsAsFactors = FALSE)
+  # colnames(crosstab_spp)[ncol(crosstab_spp)] <- "n_spp"
+  # the above works for small datasets, but exhausts memory for large
+
+  # merge counts of records and species
+  # result <- merge(crosstab_counts, crosstab_spp) # merge on all shared columns
+#
+#   return(result_df)
+#
+# }) # end lapply
+
+
+
 
 # OLD species counting code
 # crosstab_counts$n_spp <- unlist(lapply(
