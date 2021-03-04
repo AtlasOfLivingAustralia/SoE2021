@@ -132,7 +132,7 @@ crosstab_ala_data <- function(files){
     "basisOfRecord",
     # "threatened_status",
     "australianStatesAndTerritories",
-    # "iBRA7Regions", # takes too long to run
+    "iBRA7Regions", # takes a long time to run
     "national_parks")
 
   # save progress
@@ -146,11 +146,14 @@ crosstab_ala_data <- function(files){
     lapply(
       seq_len(3), # maximum number of combinations
       # seq_along(crosstab_columns),
-      function(a){combn(crosstab_columns, a, simplify = FALSE)}))[c(1:5, 20)]
-  # we never need to combine states and IBRA regions - remove pairs with these attributes
+      function(a){combn(crosstab_columns, a, simplify = FALSE)}))
 
-  # the above is in list format, which is useful for data extraction
-  # BUT we may also need a data.frame version to act as a lookup table inside the app
+  # we never need to combine states and IBRA regions - remove pairs with these attributes
+  combination_list <- combination_list[
+    !unlist(lapply(combination_list, function(a){
+      all(
+        c("australianStatesAndTerritories", "iBRA7Regions") %in% a)
+    }))]
 
   # get a list of unique values of each entry
   unique_list <- lapply(data_in[, crosstab_columns], function(x){
@@ -167,7 +170,7 @@ crosstab_ala_data <- function(files){
       lapply(expand.grid(unique_tr), function(a){as.character(a)}))
     return(result_df)
   })
-  # unlist(lapply(factor_list, nrow)) # check how many calculations are needed
+  # sum(unlist(lapply(factor_list, nrow))) # check how many calculations are needed
 
   # use lapply to get crosstabs for all combinations of data that we are interested in
   xtab_list <- lapply(factor_list, function(a){
@@ -207,6 +210,6 @@ crosstab_ala_data <- function(files){
     function(a){paste(a, collapse = "::")}))
 
   # last stage is to export xtab list and a corresponding index data.frame
-  # save(xtab_list, file = "./SoE2021/data/xtab_data.RData")
+  save(xtab_list, file = "./SoE2021/data/xtab_data.RData")
 
 }
