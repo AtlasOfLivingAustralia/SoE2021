@@ -39,7 +39,9 @@ get_ala_data <- function(){
       ala_counts(filters = select_filters(cl22 = a$full_name))
       result <- ala_occurrences(
         # taxa = select_taxa(term = "Litoria peronii"), # testing
-        filters = select_filters(cl22 = a$full_name),
+        filters = select_filters(
+          year = c(1980:2021),
+          cl22 = a$full_name),
         columns = select_columns(
           "species_guid", # species ID
           "year",
@@ -71,18 +73,13 @@ crosstab_ala_data <- function(files){
 
   # import
   data_in <- do.call(rbind, lapply(files, function(a){readRDS(a)}))
-
-  # set up which taxonomic groups to keep
-  data_in$taxon <- NA
-  chordates <- data_in$phylum == "Chordata"
-  data_in$taxon[chordates] <- data_in$class[chordates]
-  data_in$taxon[(data_in$kingdom == "Animalia" & !chordates)] <- "Invertebrates"
-  data_in$taxon[which(data_in$kingdom == "Plantae")] <- "Plants"
-  data_in$taxon[which(data_in$kingdom == "Fungi")] <- "Fungi"
-  data_in$taxon[is.na(data_in$taxon)] <- "Other"
+  # subset to rows with usable data
+  data_in <- data_in[!is.na(data_in$year), ]
+  data_in <- data_in[data_in$year > 1980, ] # can go older if needed
+  data_in <- data_in[data_in$species_guid != "", ]
 
   # classify by year
-  year_start <- seq(1971, 2016, 5)
+  year_start <- seq(1981, 2016, 5)
   data_in$year_group <- NA
   # lapply(
   for(a in seq_along(year_start)){
@@ -100,6 +97,19 @@ crosstab_ala_data <- function(files){
   # test this
   # xtabs(~ year + year_group, data = data_in)
 
+  # set up which taxonomic groups to keep
+  data_in$taxon <- NA
+  chordates <- data_in$phylum == "Chordata"
+  data_in$taxon[chordates] <- "Other Vertebrates"
+  data_in$taxon[(data_in$kingdom == "Animalia" & !chordates)] <- "Invertebrates"
+  data_in$taxon[which(data_in$class == "Amphibia")] <- "Amphibians"
+  data_in$taxon[which(data_in$class == "Reptilia")] <- "Reptiles"
+  data_in$taxon[which(data_in$class == "Mammalia")] <- "Mammals"
+  data_in$taxon[which(data_in$class == "Aves")] <- "Birds"
+  data_in$taxon[which(data_in$kingdom == "Plantae")] <- "Plants"
+  data_in$taxon[which(data_in$kingdom == "Fungi")] <- "Fungi"
+  data_in$taxon[is.na(data_in$taxon)] <- "Other"
+
   # get national parks information
   data_in$national_parks <- factor(
     as.numeric(data_in$cAPAD2016Terrestrial != "") + 1,
@@ -107,7 +117,10 @@ crosstab_ala_data <- function(files){
     labels = c("Other Land Use", "National Park"))
 
   # determine which basis of record to keep (i.e. any 'other' group?)
-  data_in$basisOfRecord[data_in$basisOfRecord == ""] <- "Not Recorded"
+  # data_in$basisOfRecord[data_in$basisOfRecord == ""] <- "Not Recorded"
+  data_in$basisOfRecord[
+    !(data_in$basisOfRecord %in% c("HumanObservation", "PreservedSpecimen"))] <- "Other"
+  # xtabs(~data_in$basisOfRecord)
 
   # classify by threatened status
   # NOT ACHIEVED YET
@@ -119,51 +132,54 @@ crosstab_ala_data <- function(files){
     "basisOfRecord",
     # "threatened_status",
     "australianStatesAndTerritories",
-    "iBRA7Regions",
+    # "iBRA7Regions", # takes too long to run
     "national_parks")
 
   # save progress
   # saveRDS(
-    # data_in[, c("species_guid", crosstab_columns)],
-    # "./cache/alldata.rds")
+  #   data_in[, c("species_guid", crosstab_columns)],
+  #   "./cache/alldata.rds")
   # NOTE: This takes ages due to large file size
   # data_in <- readRDS("./cache/alldata.rds")
 
   combination_list <- do.call(c,
     lapply(
-      seq_len(4), # maximum number of combinations
+      seq_len(3), # maximum number of combinations
       # seq_along(crosstab_columns),
-      function(a){combn(crosstab_columns, a, simplify = FALSE)}))
+      function(a){combn(crosstab_columns, a, simplify = FALSE)}))[c(1:5, 20)]
+  # we never need to combine states and IBRA regions - remove pairs with these attributes
+
   # the above is in list format, which is useful for data extraction
-  # BUT we also need a data.frame version to act as a lookup table inside the app
+  # BUT we may also need a data.frame version to act as a lookup table inside the app
 
   # get a list of unique values of each entry
-  unique_list <- lapply(data_in[, -1], function(x){
+  unique_list <- lapply(data_in[, crosstab_columns], function(x){
     out <- unique(x)
-    return(out[!is.na(out)])
+    out <- out[out != ""]
+    out <- out[!is.na(out)]
+    return(out)
   })
 
-  # use lapply to get crosstabs for all combinations of data that we are interested in
-  xtab_list <- lapply(combination_list, function(a){
-  # xtab_list <- as.list(rep(NA, length(combination_list)))
-  # for(i in seq_along(xtab_list)){
-
-    print(paste0("starting run ", paste(a, collapse = " & ")))
-    print(Sys.time())
-
-    # a <- combination_list[[i]]
-    # determine all levels of factors in the variables included this time
-    # unique_list <- lapply(data_in[, a], unique)
+  # convert into a data.frame showing every unique combination
+  factor_list <- lapply(combination_list, function(a){
     unique_tr <- unique_list[a]
-
-    # convert into a data.frame showing every unique combination
     result_df <- as.data.frame(
       lapply(expand.grid(unique_tr), function(a){as.character(a)}))
+    return(result_df)
+  })
+  # unlist(lapply(factor_list, nrow)) # check how many calculations are needed
+
+  # use lapply to get crosstabs for all combinations of data that we are interested in
+  xtab_list <- lapply(factor_list, function(a){
+
+    # track progress
+    print(paste0("starting run ", paste(colnames(a), collapse = " & ")))
+    print(Sys.time())
 
     # for every combination of variable levels, calculate the number of
     # records and species
     result_list <- lapply(
-      split(result_df, seq_len(nrow(result_df))),
+      split(a, seq_len(nrow(a))),
       function(b){
         logical_tr <- eval(str2expression(
             paste(
@@ -181,15 +197,16 @@ crosstab_ala_data <- function(files){
         ))
       })
 
-    result_df <- cbind(result_df, do.call(rbind, result_list))
-
-    xtab_list[[i]] <- result_df
-    # return(result_df)
+    result_df <- cbind(a, do.call(rbind, result_list))
+    return(result_df)
 
   })#, mc.cores = 7) # end lapply
 
-  # this fails
+  names(xtab_list) <- unlist(lapply(
+    combination_list,
+    function(a){paste(a, collapse = "::")}))
 
   # last stage is to export xtab list and a corresponding index data.frame
+  # save(xtab_list, file = "./SoE2021/data/xtab_data.RData")
 
 }

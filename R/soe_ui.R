@@ -29,20 +29,21 @@ soe_ui <- function(){
               inputId = "time_size",
               label = "Size:",
               choices = c(
+                "None" = NULL,
                 "Number of records" = "n_records",
                 "Number of species" = "n_spp")),
             # color
             selectInput(
-              inputId = "time_color",
+              inputId = "time_colour",
               label = "Colour:",
               choices = c(
-                "None" = "none",
+                "None" = NULL,
                 "Year" = "year_group",
                 "Taxon" = "taxon",
                 # "Threatened Status" = "threatened",
                 "Basis of Record" = "basisOfRecord",
                 "States" = "australianStatesAndTerritories",
-                "IBRA Regions" = "iBRA7Regions",
+                # "IBRA Regions" = "iBRA7Regions",
                 "National Parks" = "national_parks"),
               selected = "none"),
             # facet
@@ -50,13 +51,13 @@ soe_ui <- function(){
               inputId = "time_facet",
               label = "Facet:",
               choices = c(
-                "None" = "none",
+                "None" = NULL,
                 "Year" = "year_group",
                 "Taxon" = "taxon",
                 # "Threatened Status" = "threatened",
                 "Basis of Record" = "basisOfRecord",
                 "States" = "australianStatesAndTerritories",
-                "IBRA Regions" = "iBRA7Regions",
+                # "IBRA Regions" = "iBRA7Regions",
                 "National Parks" = "national_parks"),
               selected = "none"),
             add_color_options(),
@@ -67,7 +68,7 @@ soe_ui <- function(){
               width = "100%")
           ),
           mainPanel(
-            plotOutput(outputId = "chart_space", width = "100%", height = "75vh")
+            plotOutput(outputId = "time_plot", width = "100%", height = "75vh")
           )
         )
       ),
@@ -84,7 +85,7 @@ soe_ui <- function(){
                 # "Threatened Status" = "threatened",
                 "Basis of Record" = "basisOfRecord",
                 "States" = "australianStatesAndTerritories",
-                "IBRA Regions" = "iBRA7Regions",
+                # "IBRA Regions" = "iBRA7Regions",
                 "National Parks" = "national_parks"),
               selected = "states"),
             selectInput(
@@ -96,7 +97,7 @@ soe_ui <- function(){
                 # "Threatened Status" = "threatened",
                 "Basis of Record" = "basisOfRecord",
                 "States" = "australianStatesAndTerritories",
-                "IBRA Regions" = "iBRA7Regions",
+                # "IBRA Regions" = "iBRA7Regions",
                 "National Parks" = "national_parks"),
               selected = "taxon"),
             selectInput(
@@ -119,7 +120,7 @@ soe_ui <- function(){
                 # "Threatened Status" = "threatened",
                 "Basis of Record" = "basisOfRecord",
                 "States" = "australianStatesAndTerritories",
-                "IBRA Regions" = "iBRA7Regions",
+                # "IBRA Regions" = "iBRA7Regions",
                 "National Parks" = "national_parks"),
               selected = "none"),
             add_color_options(),
@@ -130,7 +131,7 @@ soe_ui <- function(){
               width = "100%")
           ),
           mainPanel(
-            plotOutput(outputId = "chart_space", width = "100%", height = "75vh")
+            plotOutput(outputId = "heatmap_plot", width = "100%", height = "75vh")
           )
         )
       ),
@@ -148,13 +149,13 @@ soe_ui <- function(){
               inputId = "log_scale",
               label = "Log scale",
               value = FALSE),
-            selectInput(
-              inputId = "map_spatial",
-              label = "Regions:",
-              choices = c(
-                "States" = "states",
-                "IBRA Regions" = "ibra"),
-              selected = "states"),
+            # selectInput(
+            #   inputId = "map_spatial",
+            #   label = "Regions:",
+            #   choices = c(
+            #     "States" = "states",
+            #     "IBRA Regions" = "ibra"),
+            #   selected = "states"),
             selectInput(
               inputId = "map_facet",
               label = "Facets:",
@@ -174,7 +175,7 @@ soe_ui <- function(){
               width = "100%")
           ),
           mainPanel(
-            plotOutput(outputId = "chart_space", width = "100%", height = "75vh")
+            plotOutput(outputId = "map_plot", width = "100%", height = "75vh")
           )
         )
       )
@@ -198,10 +199,10 @@ add_color_options <- function(){
     checkboxInput(
       inputId = "color_reverse",
       label = "Reverse colors",
-      value = FALSE),
-    actionButton(
-      inputId = "redraw",
-      label = "Redraw",
-      width = "100%")
+      value = FALSE)
+    # actionButton(
+    #   inputId = "redraw",
+    #   label = "Redraw",
+    #   width = "100%")
   )
 }
