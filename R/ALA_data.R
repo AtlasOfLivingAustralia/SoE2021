@@ -127,6 +127,7 @@ crosstab_ala_data <- function(files){
     # data_in[, c("species_guid", crosstab_columns)],
     # "./cache/alldata.rds")
   # NOTE: This takes ages due to large file size
+  # data_in <- readRDS("./cache/alldata.rds")
 
   combination_list <- do.call(c,
     lapply(
@@ -136,19 +137,32 @@ crosstab_ala_data <- function(files){
   # the above is in list format, which is useful for data extraction
   # BUT we also need a data.frame version to act as a lookup table inside the app
 
-  # use lapply to get crosstabs for all combinations of data that we are interested in
-  xtab_list <- lapply(combination_list[1:3], function(a){
+  # get a list of unique values of each entry
+  unique_list <- lapply(data_in[, -1], function(x){
+    out <- unique(x)
+    return(out[!is.na(out)])
+  })
 
+  # use lapply to get crosstabs for all combinations of data that we are interested in
+  xtab_list <- lapply(combination_list, function(a){
+  # xtab_list <- as.list(rep(NA, length(combination_list)))
+  # for(i in seq_along(xtab_list)){
+
+    print(paste0("starting run ", paste(a, collapse = " & ")))
+    print(Sys.time())
+
+    # a <- combination_list[[i]]
     # determine all levels of factors in the variables included this time
-    unique_list <- lapply(data_in[, a], unique)
+    # unique_list <- lapply(data_in[, a], unique)
+    unique_tr <- unique_list[a]
 
     # convert into a data.frame showing every unique combination
     result_df <- as.data.frame(
-      lapply(expand.grid(unique_list), function(a){as.character(a)}))
+      lapply(expand.grid(unique_tr), function(a){as.character(a)}))
 
     # for every combination of variable levels, calculate the number of
     # records and species
-    result_list <- mclapply(
+    result_list <- lapply(
       split(result_df, seq_len(nrow(result_df))),
       function(b){
         logical_tr <- eval(str2expression(
@@ -161,20 +175,20 @@ crosstab_ala_data <- function(files){
               collapse = " & ")
         ))
         # return two numbers
-        # n_records <- length(which(logical_tr))
-        # if(n_records > 0){}else{}
         return(c(
           n_records = length(which(logical_tr)),
           n_spp = length(which(unique(data_in$species_guid[logical_tr]) != ""))
         ))
-      },
-      mc.cores = detectCores() - 1)
+      })
 
     result_df <- cbind(result_df, do.call(rbind, result_list))
 
-    return(result_df)
+    xtab_list[[i]] <- result_df
+    # return(result_df)
 
-  }) # end lapply
+  })#, mc.cores = 7) # end lapply
+
+  # this fails
 
   # last stage is to export xtab list and a corresponding index data.frame
 
