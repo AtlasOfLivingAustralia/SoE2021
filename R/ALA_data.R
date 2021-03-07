@@ -74,9 +74,9 @@ crosstab_ala_data <- function(files){
   # import
   data_in <- do.call(rbind, lapply(files, function(a){readRDS(a)}))
   # subset to rows with usable data
-  data_in <- data_in[!is.na(data_in$year), ]
-  data_in <- data_in[data_in$year > 1980, ] # can go older if needed
-  data_in <- data_in[data_in$species_guid != "", ]
+  # data_in <- data_in[!is.na(data_in$year), ]
+  # data_in <- data_in[data_in$year > 1980, ] # can go older if needed
+  # data_in <- data_in[data_in$species_guid != "", ]
 
   # classify by year
   year_start <- seq(1981, 2016, 5)
