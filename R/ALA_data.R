@@ -3,7 +3,6 @@
 #' @title ALA data
 #' @name lookup_df
 #' @name data_list
-#' @importFrom parallel mcapply detectCores
 #' @export build_ala_data
 
 
