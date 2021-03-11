@@ -28,7 +28,8 @@ plot_bar <- function(data, pars){
         x = pars$x, # colnames(data)[1],
         y = y_var)) +
       geom_bar(stat = "identity", color = palette, fill = palette) +
-      theme_bw()
+      theme_bw() +
+      labs(x = label_name(pars$x), y = label_name(pars$y, pars$log_scale))
 
   }else{
 
@@ -60,7 +61,8 @@ plot_bar <- function(data, pars){
       scale_fill_manual(
         values = palette,
         aesthetics = c("fill", "color")) +
-      theme_bw()
+      theme_bw() + labs(x = label_name(pars$x),
+                        y = label_name(pars$y, pars$log_scale))
   }
 
   return(p)
@@ -100,8 +102,29 @@ plot_heatmap <- function(data, pars){
     scale_fill_viridis(
       option = pars$color_scheme,
       direction = palette_direction) +
-    theme_bw()
-
+    theme_bw() + labs(x = label_name(pars$x),
+                      y = label_name(pars$y),
+                      fill = label_name(pars$z, pars$log_scale))
   return(p)
 
+}
+
+
+## Plot helper functions
+
+label_name <- function(v, log = FALSE) {
+  name <- switch(v,
+         "year_group" = "Year",
+         "taxon" = "Taxon",
+         # "threatened" = "Threatened Status",
+         "basisOfRecord" = "Basis of Record",
+         "australianStatesAndTerritories" = "States",
+         "iBRA7Regions" = "IBRA Regions",
+         "national_parks" = "National Parks",
+         "n_records" = "Record count",
+         "n_spp" = "Species count")
+  if (log) {
+    name <- paste0("log(", name, ")")
+  }
+  name
 }

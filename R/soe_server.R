@@ -5,7 +5,7 @@
 #' @importFrom shiny observeEvent reactiveValues renderPlot plotOutput
 #' @importFrom galah ala_config
 #' @importFrom ggplot2 ggplot aes aes_string geom_bar geom_line geom_point
-#' geom_tile theme_bw labs
+#' geom_tile scale_x_discrete theme_bw labs xlab ylab
 
 # @importFrom thematic thematic_shiny
 # thematic_shiny()
