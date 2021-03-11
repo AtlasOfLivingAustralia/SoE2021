@@ -1,0 +1,107 @@
+#' @importFrom viridisLite viridis
+
+plot_bar <- function(data, pars){
+
+  ## test code for ordering factor levels (fails)
+  # data_tr <- data[order(data[[y]], decreasing = FALSE), ]
+  # data_tr[[pars$x]] <- factor(data_tr[[pars$x]],
+  #   levels = seq_along(unique(data_tr))[[pars$x]],
+  #   labels = data_tr[[pars$x]])
+
+  if(pars$log_scale){
+    y_var <- paste0("log(", pars$y, ")")
+  }else{
+    y_var <- pars$y
+  }
+
+  if(pars$color == "none"){
+
+    # choose a colour
+    palette <- viridisLite::viridis(
+      n = 1,
+      option = pars$color_scheme,
+      begin = 0.5)
+
+    # draw
+    p <- ggplot(data,
+      aes_string(
+        x = pars$x, # colnames(data)[1],
+        y = y_var)) +
+      geom_bar(stat = "identity", color = palette, fill = palette) +
+      theme_bw()
+
+  }else{
+
+    # set color direction
+    if(pars$color_reverse){
+      palette_direction <- -1
+    }else{
+      palette_direction <- 1
+    }
+
+    # set palette etc
+    color <- pars$color
+    color_n <- length(unique(data[[pars$color]]))
+    palette <- viridisLite::viridis(
+      n = color_n,
+      option = pars$color_scheme,
+      direction = palette_direction,
+      begin = 0.1,
+      end = 0.9)
+
+    # draw
+    p <- ggplot(data,
+      aes_string(
+        x = pars$x, # colnames(data)[1],
+        y = y_var,
+        color = color,
+        fill = color)) +
+      geom_bar(stat = "identity") +
+      scale_fill_manual(
+        values = palette,
+        aesthetics = c("fill", "color")) +
+      theme_bw()
+  }
+
+  return(p)
+
+}
+
+# # facet
+# if(is.null(input$time_facet)){
+#   facet <- NULL
+# }else{
+#   facet <- ggplot2::facet_wrap(ggplot2::vars(input$time_facet))
+# }
+
+
+plot_heatmap <- function(data, pars){
+
+  # set log scale
+  if(pars$log_scale){
+    z_var <- paste0("log(", pars$z, ")")
+  }else{
+    z_var <- pars$z
+  }
+
+  # set color direction
+  if(pars$color_reverse){
+    palette_direction <- -1
+  }else{
+    palette_direction <- 1
+  }
+
+  p <- ggplot(data,
+    aes_string(
+      x = pars$x, # colnames(data)[1],
+      y = pars$y,
+      fill = z_var)) +
+    geom_tile() +
+    scale_fill_viridis(
+      option = pars$color_scheme,
+      direction = palette_direction) +
+    theme_bw()
+
+  return(p)
+
+}

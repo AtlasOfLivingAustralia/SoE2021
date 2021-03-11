@@ -1,154 +1,85 @@
 #' Build UI for shiny app
 #'
 #' @importFrom shiny fluidPage titlePanel sidebarLayout sidebarPanel mainPanel
-#' selectInput plotOutput downloadButton checkboxInput tabPanel
+#' selectInput plotOutput downloadButton checkboxInput tabPanel verbatimTextOutput
 #' @importFrom bslib bs_theme
 
 soe_ui <- function(){
   fluidPage(
     titlePanel("State of the Environment 2021"),
     theme = bs_theme(version = 4, bootswatch = "minty", secondary = "#F26649"),
-    tabsetPanel(type = "pills",
-      tabPanel("Time Series",
+    tabsetPanel(
+      id = "tabs",
+      type = "pills",
+      tabPanel("Barchart", value = "bar",
         br(),
         sidebarLayout(
           sidebarPanel(
-            # y
-            selectInput(
-              inputId = "time_y",
-              label = "Y Axis:",
-              choices = c(
-                "Number of records" = "n_records",
-                "Number of species" = "n_spp")),
-            checkboxInput(
-              inputId = "log_scale",
-              label = "Log scale",
-              value = FALSE),
-            # size
-            selectInput(
-              inputId = "time_size",
-              label = "Size:",
-              choices = c(
-                "None" = NULL,
-                "Number of records" = "n_records",
-                "Number of species" = "n_spp")),
-            # color
-            selectInput(
-              inputId = "time_colour",
-              label = "Colour:",
-              choices = c(
-                "None" = NULL,
-                "Year" = "year_group",
-                "Taxon" = "taxon",
-                # "Threatened Status" = "threatened",
-                "Basis of Record" = "basisOfRecord",
-                "States" = "australianStatesAndTerritories",
-                # "IBRA Regions" = "iBRA7Regions",
-                "National Parks" = "national_parks"),
-              selected = "none"),
-            # facet
-            selectInput(
-              inputId = "time_facet",
-              label = "Facet:",
-              choices = c(
-                "None" = NULL,
-                "Year" = "year_group",
-                "Taxon" = "taxon",
-                # "Threatened Status" = "threatened",
-                "Basis of Record" = "basisOfRecord",
-                "States" = "australianStatesAndTerritories",
-                # "IBRA Regions" = "iBRA7Regions",
-                "National Parks" = "national_parks"),
-              selected = "none"),
-            add_color_options(),
-            hr(),
-            actionButton(
-              inputId = "download_modal",
-              label = "Download",
-              width = "100%")
-          ),
-          mainPanel(
-            plotOutput(outputId = "time_plot", width = "100%", height = "75vh")
-          )
-        )
-      ),
-      tabPanel("Heatmap",
-        br(),
-        sidebarLayout(
-          sidebarPanel(
-            selectInput(
-              inputId = "heatmap_x",
+            # x
+            category_dropdown(
+              inputId = "x_bar",
               label = "X Axis:",
-              choices = c(
-                "Year" = "year_group",
-                "Taxon" = "taxon",
-                # "Threatened Status" = "threatened",
-                "Basis of Record" = "basisOfRecord",
-                "States" = "australianStatesAndTerritories",
-                # "IBRA Regions" = "iBRA7Regions",
-                "National Parks" = "national_parks"),
-              selected = "states"),
-            selectInput(
-              inputId = "heatmap_y",
-              label = "Y Axis:",
-              choices = c(
-                "Year" = "year_group",
-                "Taxon" = "taxon",
-                # "Threatened Status" = "threatened",
-                "Basis of Record" = "basisOfRecord",
-                "States" = "australianStatesAndTerritories",
-                # "IBRA Regions" = "iBRA7Regions",
-                "National Parks" = "national_parks"),
-              selected = "taxon"),
-            selectInput(
-              inputId = "heatmap_z",
-              label = "Z axis:",
-              choices = c(
-                "Number of records" = "n_records",
-                "Number of species" = "n_spp")),
+              selected = "Year"),
+            # y
+            count_dropdown(
+              inputId = "y_bar",
+              label = "Y Axis:"),
             checkboxInput(
-              inputId = "log_scale",
+              inputId = "log_bar",
               label = "Log scale",
               value = FALSE),
-            selectInput(
-              inputId = "heatmap_facet",
-              label = "Facets:",
-              choices = c(
-                "None" = "none",
-                "Year" = "year_group",
-                "Taxon" = "taxon",
-                # "Threatened Status" = "threatened",
-                "Basis of Record" = "basisOfRecord",
-                "States" = "australianStatesAndTerritories",
-                # "IBRA Regions" = "iBRA7Regions",
-                "National Parks" = "national_parks"),
-              selected = "none"),
-            add_color_options(),
-            hr(),
-            actionButton(
-              inputId = "download_modal",
-              label = "Download",
-              width = "100%")
+            # color
+            category_dropdown(
+              inputId = "colour_bar",
+              label = "Colour:",
+              selected = "Year",
+              include_none = TRUE),
+            add_color_options(suffix = "bar")
           ),
           mainPanel(
-            plotOutput(outputId = "heatmap_plot", width = "100%", height = "75vh")
+            # verbatimTextOutput("text_1"),
+            plotOutput(outputId = "barplot", width = "100%", height = "75vh")
           )
         )
       ),
-      tabPanel("Map",
+      tabPanel("Heatmap", value = "heatmap",
         br(),
         sidebarLayout(
           sidebarPanel(
-            selectInput(
-              inputId = "count_type",
-              label = "Counts:",
-              choices = c(
-                "Number of records" = "n_records",
-                "Number of species" = "n_spp")),
+            category_dropdown(
+              inputId = "x_heatmap",
+              label = "X Axis:",
+              selected = "australianStatesAndTerritories"),
+            category_dropdown(
+              inputId = "y_heatmap",
+              label = "Y Axis:",
+              selected = "taxon"),
+            count_dropdown(
+              inputId = "z_heatmap",
+              label = "Z Axis:"),
             checkboxInput(
-              inputId = "log_scale",
+              inputId = "log_heatmap",
               label = "Log scale",
               value = FALSE),
+            category_dropdown(
+              inputId = "facet",
+              label = "Facet:",
+              selected = "None"),
+            add_color_options(suffix = "heatmap")
+          ),
+          mainPanel(
+            # verbatimTextOutput("text_2"),
+            plotOutput(outputId = "heatmap", width = "100%", height = "75vh")
+          )
+        )
+      ),
+      tabPanel("Map", value = "map",
+        br(),
+        sidebarLayout(
+          sidebarPanel(
+            count_dropdown(
+              inputId = "z_axis",
+              label = "Counts:"),
             # selectInput(
             #   inputId = "map_spatial",
             #   label = "Regions:",
@@ -156,23 +87,11 @@ soe_ui <- function(){
             #     "States" = "states",
             #     "IBRA Regions" = "ibra"),
             #   selected = "states"),
-            selectInput(
-              inputId = "map_facet",
-              label = "Facets:",
-              choices = c(
-                "None" = "none",
-                "Year" = "year_group",
-                "Taxon" = "taxon",
-                # "Threatened Status" = "threatened",
-                "Basis of Record" = "basisOfRecord",
-                "National Parks" = "national_parks"),
-              selected = "none"),
-            add_color_options(),
-            hr(),
-            actionButton(
-              inputId = "download_modal",
-              label = "Download",
-              width = "100%")
+            category_dropdown(
+              inputId = "facet",
+              label = "Facet:",
+              selected = "None"),
+            add_color_options(suffix = "map")
           ),
           mainPanel(
             plotOutput(outputId = "map_plot", width = "100%", height = "75vh")
@@ -184,10 +103,41 @@ soe_ui <- function(){
 }
 
 
-add_color_options <- function(){
+# preset some types of UI
+category_dropdown <- function(inputId, label, selected, include_none = FALSE){
+  choices_default <- c(
+    "Year" = "year_group",
+    "Taxon" = "taxon",
+    # "Threatened Status" = "threatened",
+    "Basis of Record" = "basisOfRecord",
+    "States" = "australianStatesAndTerritories",
+    "IBRA Regions" = "iBRA7Regions",
+    "National Parks" = "national_parks")
+  if(include_none){
+    choices <- c("None" = "none", choices_default)
+  }else{
+    choices <- choices_default
+  }
+  return(selectInput(
+    inputId = inputId,
+    label = label,
+    choices = choices,
+    selected = selected))
+}
+
+count_dropdown <- function(inputId, label){
+  selectInput(
+    inputId = inputId,
+    label = label,
+    choices = c(
+      "Number of records" = "n_records",
+      "Number of species" = "n_spp"))
+}
+
+add_color_options <- function(suffix){
   list(
     selectInput(
-      inputId = "color_scheme",
+      inputId = paste0("color_scheme_", suffix),
       label = "Colour scheme:",
       choices = c(
         "viridis",
@@ -197,12 +147,74 @@ add_color_options <- function(){
         "cividis"),
       width = "100%"),
     checkboxInput(
-      inputId = "color_reverse",
+      inputId = paste0("color_reverse_", suffix),
       label = "Reverse colors",
-      value = FALSE)
-    # actionButton(
-    #   inputId = "redraw",
-    #   label = "Redraw",
-    #   width = "100%")
+      value = FALSE),
+    actionButton(
+      inputId = "download_modal",
+      label = "Download",
+      width = "100%")
   )
 }
+
+
+
+## TIME SERIES (I.E. LINKED DOT AND LINE PLOT) REMOVED FOR NOW
+# tabPanel("Time Series", value = "time",
+#   br(),
+#   sidebarLayout(
+#     sidebarPanel(
+#       # y
+#       selectInput(
+#         inputId = "time_y",
+#         label = "Y Axis:",
+#         choices = c(
+#           "Number of records" = "n_records",
+#           "Number of species" = "n_spp")),
+#       checkboxInput(
+#         inputId = "log_scale",
+#         label = "Log scale",
+#         value = FALSE),
+#       # size
+#       selectInput(
+#         inputId = "time_size",
+#         label = "Size:",
+#         choices = c(
+#           "None" = NULL,
+#           "Number of records" = "n_records",
+#           "Number of species" = "n_spp")),
+#       # color
+#       selectInput(
+#         inputId = "time_colour",
+#         label = "Colour:",
+#         choices = c(
+#           "None" = NULL,
+#           "Year" = "year_group",
+#           "Taxon" = "taxon",
+#           # "Threatened Status" = "threatened",
+#           "Basis of Record" = "basisOfRecord",
+#           "States" = "australianStatesAndTerritories",
+#           "IBRA Regions" = "iBRA7Regions",
+#           "National Parks" = "national_parks"),
+#         selected = "None"),
+#       # facet
+#       selectInput(
+#         inputId = "time_facet",
+#         label = "Facet:",
+#         choices = c(
+#           "None" = NULL,
+#           "Year" = "year_group",
+#           "Taxon" = "taxon",
+#           # "Threatened Status" = "threatened",
+#           "Basis of Record" = "basisOfRecord",
+#           "States" = "australianStatesAndTerritories",
+#           "IBRA Regions" = "iBRA7Regions",
+#           "National Parks" = "national_parks"),
+#         selected = "None"),
+#       add_color_options()
+#     ),
+#     mainPanel(
+#       plotOutput(outputId = "time_plot", width = "100%", height = "75vh")
+#     )
+#   )
+# ),
