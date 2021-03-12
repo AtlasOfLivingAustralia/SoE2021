@@ -1,4 +1,5 @@
 #' @importFrom viridisLite viridis
+#' @importFrom ozmaps ozmap_data
 
 plot_bar <- function(data, pars){
 
@@ -107,6 +108,38 @@ plot_heatmap <- function(data, pars){
                       fill = label_name(pars$z, pars$log_scale))
   return(p)
 
+}
+
+plot_map <- function(data, pars) {
+  # join data to state/ibra map
+  if(pars$log_scale){
+    z_var <- paste0("log(", pars$z, ")")
+  }else{
+    z_var <- pars$z
+  }
+  
+  if(pars$color_reverse){
+    palette_direction <- -1
+  }else{
+    palette_direction <- 1
+  }
+  
+  if(pars$map_type == "australianStatesAndTerritories") {
+    data <- inner_join(ozmap_data("states"), data,
+                       by = c("NAME" = "australianStatesAndTerritories"))
+  } else {
+    data <- inner_join(ibra_map, data,
+                       by = c("REG_NAME_7" = "iBRA7Regions"))
+  }
+  p <- ggplot(data) +
+    geom_sf(aes_string(fill = z_var), color = "grey50", size = 0.2) +
+    lims(x = c(110, 155), y = c(-45, -10)) +
+    scale_fill_viridis(
+      option = "viridis",
+      direction = palette_direction) +
+    theme_bw() +
+    labs(fill = label_name(pars$z, pars$log_scale))
+  return(p)
 }
 
 

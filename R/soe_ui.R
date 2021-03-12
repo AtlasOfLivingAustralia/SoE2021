@@ -80,13 +80,17 @@ soe_ui <- function(){
             count_dropdown(
               inputId = "z_axis",
               label = "Counts:"),
-            # selectInput(
-            #   inputId = "map_spatial",
-            #   label = "Regions:",
-            #   choices = c(
-            #     "States" = "states",
-            #     "IBRA Regions" = "ibra"),
-            #   selected = "states"),
+             selectInput(
+               inputId = "map_spatial",
+               label = "Regions:",
+               choices = c(
+                 "States" = "australianStatesAndTerritories",
+                 "IBRA Regions" = "iBRA7Regions"),
+               selected = "states"),
+            checkboxInput(
+              inputId = "log_map",
+              label = "Log scale",
+              value = FALSE),
             category_dropdown(
               inputId = "facet",
               label = "Facet:",
@@ -94,7 +98,7 @@ soe_ui <- function(){
             add_color_options(suffix = "map")
           ),
           mainPanel(
-            plotOutput(outputId = "map_plot", width = "100%", height = "75vh")
+            plotOutput(outputId = "map", width = "100%", height = "75vh")
           )
         )
       )
