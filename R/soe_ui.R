@@ -154,12 +154,17 @@ add_color_options <- function(suffix){
       inputId = paste0("color_reverse_", suffix),
       label = "Reverse colors",
       value = FALSE),
-    actionButton(
-      inputId = "download_modal",
-      label = "Download",
-      width = "100%")
+    #actionButton(
+    #  inputId = "download_modal",
+    #  label = "Download",
+    #  width = "100%")
+    downloadButton(
+      outputId = paste0("download_", suffix)
+    )
   )
 }
+
+
 
 
 

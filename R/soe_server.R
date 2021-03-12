@@ -4,7 +4,7 @@
 #'
 #' @importFrom shiny observeEvent reactiveValues renderPlot plotOutput
 #' @importFrom galah ala_config
-#' @importFrom ggplot2 ggplot aes aes_string facet_wrap geom_bar geom_line 
+#' @importFrom ggplot2 ggplot ggsave aes aes_string facet_wrap geom_bar geom_line 
 #' geom_point geom_tile scale_x_discrete scale_fill_manual theme_bw labs xlab ylab
 
 # @importFrom thematic thematic_shiny
@@ -110,22 +110,42 @@ soe_server <- function(input, output, session){
     )
     print(df$plot_map)
   })
-
+  
+  # Download plot- ugly but works
+  output$download_map <- downloadHandler(
+    filename = "map_plot.png",
+    content = function(file) {
+      ggsave(file)
+    }
+  )
+  output$download_bar <- downloadHandler(
+    filename = "bar_plot.png",
+    content = function(file) {
+      ggsave(file)
+    }
+  )
+  output$download_heatmap <- downloadHandler(
+    filename = "heatmap_plot.png",
+    content = function(file) {
+      ggsave(file)
+    }
+  )
+  
   # save modal
-  observeEvent(input$download_modal, {
-    save_modal()
-  })
+  #observeEvent(input$download_modal, {
+  #  save_modal()
+  #})
 
   # when 'save' is hit, save the file as requested
-  observeEvent(input$save_data_execute, {
-    ggsave(
-      filename = paste(
-        input$save_filename,
-        tolower(input$save_type),
-        sep = "."),
-      plot = df$plot,
-      device = tolower(input$save_type)
-    )
+  #observeEvent(input$save_data_execute, {
+  #  ggsave(
+  #    filename = paste(
+  #      input$save_filename,
+  #      tolower(input$save_type),
+  #      sep = "."),
+  #    plot = df$plot,
+  #    device = tolower(input$save_type)
+  #  )
     ## note that the above saves to the app directory
     ## a better choice is to use a download handler:
     # downloadHandler(
@@ -136,6 +156,6 @@ soe_server <- function(input, output, session){
     #   ),
     #   content = function()
     # )
-  })
+  #})
 
 }
