@@ -1,5 +1,6 @@
 #' @importFrom viridisLite viridis
-#' @importFrom ozmaps ozmap_data
+#' @import ozmaps
+#' @importFrom dplyr inner_join
 
 plot_bar <- function(data, pars){
 
@@ -125,7 +126,7 @@ plot_map <- function(data, pars) {
   }
   
   if(pars$map_type == "australianStatesAndTerritories") {
-    data <- inner_join(ozmap_data("states"), data,
+    data <- inner_join(ozmaps::ozmap_states, data,
                        by = c("NAME" = "australianStatesAndTerritories"))
   } else {
     data <- inner_join(ibra_map, data,
