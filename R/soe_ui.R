@@ -62,9 +62,9 @@ soe_ui <- function(){
               label = "Log scale",
               value = FALSE),
             category_dropdown(
-              inputId = "facet",
+              inputId = "facet_heatmap",
               label = "Facet:",
-              selected = "None"),
+              selected = "None", include_none = TRUE),
             add_color_options(suffix = "heatmap")
           ),
           mainPanel(
@@ -92,9 +92,9 @@ soe_ui <- function(){
               label = "Log scale",
               value = FALSE),
             category_dropdown(
-              inputId = "facet",
+              inputId = "facet_map",
               label = "Facet:",
-              selected = "None"),
+              selected = "None", include_none = TRUE),
             add_color_options(suffix = "map")
           ),
           mainPanel(

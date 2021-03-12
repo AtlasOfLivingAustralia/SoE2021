@@ -4,8 +4,8 @@
 #'
 #' @importFrom shiny observeEvent reactiveValues renderPlot plotOutput
 #' @importFrom galah ala_config
-#' @importFrom ggplot2 ggplot aes aes_string geom_bar geom_line geom_point
-#' geom_tile scale_x_discrete scale_fill_manual theme_bw labs xlab ylab
+#' @importFrom ggplot2 ggplot aes aes_string facet_wrap geom_bar geom_line 
+#' geom_point geom_tile scale_x_discrete scale_fill_manual theme_bw labs xlab ylab
 
 # @importFrom thematic thematic_shiny
 # thematic_shiny()
@@ -40,22 +40,24 @@ soe_server <- function(input, output, session){
           z = input$z_heatmap,
           log_scale = input$log_heatmap,
           color_scheme = input$color_scheme_heatmap,
-          color_reverse = input$color_reverse_heatmap)
+          color_reverse = input$color_reverse_heatmap,
+          facet = input$facet_heatmap)
       },
       "map" = {list(
         z = input$z_axis,
         map_type = input$map_spatial,
         log_scale = input$log_map,
-        color_scheme = input$scolor_scheme_map,
-        color_reverse = input$color_reverse_map)
+        color_scheme = input$color_scheme_map,
+        color_reverse = input$color_reverse_map,
+        facet = input$facet_map)
       }
     )
     df$current_values <- current_vals
     
     variable_lookup <- switch(input$tabs,
       "bar" = {current_vals[c("x", "color")]},
-      "heatmap" = {current_vals[c("x", "y")]}, # "facet"
-      "map" = {current_vals[c("map_type")]}) # "facet"
+      "heatmap" = {current_vals[c("x", "y", "facet")]}, # "facet"
+      "map" = {current_vals[c("map_type", "facet")]}) # "facet"
 
     # determine which entry from xtab_list contains the requisite data
     df$lookup <- which(unlist(lapply(

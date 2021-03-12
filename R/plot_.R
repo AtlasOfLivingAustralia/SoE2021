@@ -107,6 +107,9 @@ plot_heatmap <- function(data, pars){
     theme_bw() + labs(x = label_name(pars$x),
                       y = label_name(pars$y),
                       fill = label_name(pars$z, pars$log_scale))
+  if (pars$facet != "none") {
+    p <- p + facet_wrap(as.formula(paste("~", pars$facet)))
+  }
   return(p)
 
 }
@@ -136,10 +139,14 @@ plot_map <- function(data, pars) {
     geom_sf(aes_string(fill = z_var), color = "grey50", size = 0.2) +
     lims(x = c(110, 155), y = c(-45, -10)) +
     scale_fill_viridis(
-      option = "viridis",
+      option = pars$color_scheme,
       direction = palette_direction) +
     theme_bw() +
     labs(fill = label_name(pars$z, pars$log_scale))
+  
+  if (pars$facet != "none") {
+    p <- p + facet_wrap(as.formula(paste("~", pars$facet)))
+  }
   return(p)
 }
 
