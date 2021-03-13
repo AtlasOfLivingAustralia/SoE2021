@@ -142,7 +142,13 @@ plot_map <- function(data, pars) {
       option = pars$color_scheme,
       direction = palette_direction) +
     theme_bw() +
-    labs(fill = label_name(pars$z, pars$log_scale))
+    labs(fill = label_name(pars$z, pars$log_scale)) +
+    # remove axes labels
+    theme(
+      axis.text.x = element_blank(),
+      axis.text.y = element_blank(),
+      axis.ticks = element_blank()
+    )
   
   if (pars$facet != "none") {
     p <- p + facet_wrap(as.formula(paste("~", pars$facet)))

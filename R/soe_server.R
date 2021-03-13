@@ -4,8 +4,8 @@
 #'
 #' @importFrom shiny observeEvent reactiveValues renderPlot plotOutput
 #' @importFrom galah ala_config
-#' @importFrom ggplot2 ggplot ggsave aes aes_string facet_wrap geom_bar geom_line 
-#' geom_point geom_tile scale_x_discrete scale_fill_manual theme_bw labs xlab ylab
+#' @importFrom ggplot2 ggplot ggsave aes aes_string element_blank facet_wrap geom_bar geom_line 
+#' geom_point geom_tile scale_x_discrete scale_fill_manual theme theme_bw labs xlab ylab
 
 # @importFrom thematic thematic_shiny
 # thematic_shiny()
