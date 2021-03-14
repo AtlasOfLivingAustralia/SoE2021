@@ -9,6 +9,11 @@ plot_bar <- function(data, pars){
   # data_tr[[pars$x]] <- factor(data_tr[[pars$x]],
   #   levels = seq_along(unique(data_tr))[[pars$x]],
   #   labels = data_tr[[pars$x]])
+  
+  if (pars$x == "australianStatesAndTerritories") {
+    data$australianStatesAndTerritories <-
+      state_abb(data$australianStatesAndTerritories)
+  }
 
   if(pars$log_scale){
     y_var <- paste0("log(", pars$y, ")")
@@ -80,6 +85,11 @@ plot_bar <- function(data, pars){
 
 
 plot_heatmap <- function(data, pars){
+
+  if (pars$x == "australianStatesAndTerritories") {
+    data$australianStatesAndTerritories <-
+      state_abb(data$australianStatesAndTerritories)
+  }
 
   # set log scale
   if(pars$log_scale){
@@ -174,4 +184,19 @@ label_name <- function(v, log = FALSE) {
     name <- paste0("log(", name, ")")
   }
   name
+}
+
+state_abb <- function(states) {
+  abbs <- unlist(lapply(states, function(s) {
+    switch(s, 
+           "Australian Capital Territory" = "ACT",
+           "Queensland" = "QLD",
+           "Victoria" = "VIC",
+           "New South Wales" = "NSW",
+           "Tasmania" = "TAS",
+           "Western Australia" = "WA",
+           "Northern Territory" = "NT",
+           "South Australia" = "SA"
+    )
+  }))
 }
