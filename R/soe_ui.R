@@ -101,6 +101,34 @@ soe_ui <- function(){
             plotOutput(outputId = "map", width = "100%", height = "75vh")
           )
         )
+      ),
+      tabPanel("Interactive map", value = "i_map",
+        br(),
+        sidebarLayout(
+         sidebarPanel(
+           count_dropdown(
+             inputId = "z_axis",
+             label = "Counts:"),
+           selectInput(
+             inputId = "i_map_spatial",
+             label = "Regions:",
+             choices = c(
+               "IBRA Regions" = "iBRA7Regions"),
+             selected = "iBRA7Regions"),
+           checkboxInput(
+             inputId = "log_i_map",
+             label = "Log scale",
+             value = FALSE),
+           category_dropdown(
+             inputId = "facet_i_map",
+             label = "Facet:",
+             selected = "None", include_none = TRUE),
+           add_color_options(suffix = "i_map")
+         ),
+         mainPanel(
+           leafletOutput(outputId = "i_map", width = "100%", height = "75vh")
+         )
+        )
       )
     )
   )

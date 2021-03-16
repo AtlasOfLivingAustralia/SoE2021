@@ -167,6 +167,40 @@ plot_map <- function(data, pars) {
 }
 
 
+plot_i_map <- function(data, pars) {
+  
+  if(pars$log_scale){
+    z_var <- paste0("log(", pars$z, ")")
+  }else{
+    z_var <- pars$z
+  }
+
+  data <- inner_join(ibra_map, data,
+                     by = c("REG_NAME_7" = "iBRA7Regions"))
+  
+  colPalette <- "Reds" 
+  colPal <- colorNumeric(
+    palette = colPalette,
+    domain = data[[z_var]])
+  
+  # Leaflet visualisation
+  p <- leaflet(data = data) %>%
+    setView(lng = 133.88362, lat = -23.69748, zoom = 4) %>%
+    addTiles() %>%
+    addPolygons(fillColor = colPal(data[[z_var]]),
+                fillOpacity = .8, color = "#111111", weight = 1, stroke = TRUE,
+                highlightOptions = highlightOptions(color = "#222222", weight = 3, bringToFront = TRUE),
+                label = build_labels(data, pars, z_var),
+                labelOptions = labelOptions(
+                  style = list("font-weight" = "normal", padding = "3px 5px"),
+                  textsize = "12px",
+                  direction = "auto")) %>%
+    addLegend("bottomright", pal = colPal, values = data[[z_var]],
+              title = "Records Count",
+              opacity = 1)
+  return(p)
+}
+
 ## Plot helper functions
 
 label_name <- function(v, log = FALSE) {
@@ -199,4 +233,26 @@ state_abb <- function(states) {
            "South Australia" = "SA"
     )
   }))
+}
+
+# TODO: enable taxa and period-specific labels
+build_labels <- function(data, pars, z_var) {
+  taxa <- "All"
+  period <- c(0, 2030)
+  if (pars$map_type == "iBRA7Regions") {
+    labels <- sprintf("<strong>%s</strong><br/>Code: %s<br/>ID: %g<br/>Area (km<sup>2</sup>): %g<br/><br/><strong>Taxa: %s</strong><br/>Period: %g - %g<br/>Records Count: %g",
+                      data$REG_NAME_7, data$REG_CODE_7, data$REC_ID, data$SQ_KM,
+                      taxa, period[1], period[length(period)], data[[z_var]]) %>%
+      lapply(htmltools::HTML)
+  } else if (pars$map_type == "IMCRA") {
+    labels <- sprintf("<strong>%s</strong><br/>Code: %s<br/>ID: %g<br/>Area (km<sup>2</sup>): %g<br/><br/><strong>Taxa: %s</strong><br/>Records Count: %g",
+                      data$MESO_NAME, data$MESO_ABBR, data$MESO_NUM, data$AREA_KM2, taxa, data$z_var) %>%
+      lapply(htmltools::HTML)
+  } else if (pars$map_type == "CAPAD16") {
+    labels <- sprintf("<strong>%s</strong><br/>Code: %s<br/>ID: %s<br/>Area (km<sup>2</sup>): %g<br/><br/><strong>Taxa: %s</strong><br/>Records Count: %g",
+                      data$NAME, data$RES_NUMBER, data$PA_ID, data$GIS_AREA, taxa, data$z_var) %>%
+      lapply(htmltools::HTML)
+  } else {
+    print('Not a valid region name.')  
+  }
 }

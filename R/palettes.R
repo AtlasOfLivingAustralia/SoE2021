@@ -16,3 +16,4 @@ ala_colors <- c(
   ocean = "#003A70",
   lavender = "#A19B2",
   plum = "#691C32"
+)

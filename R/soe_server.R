@@ -6,6 +6,8 @@
 #' @importFrom galah ala_config
 #' @importFrom ggplot2 ggplot ggsave aes aes_string element_blank facet_wrap geom_bar geom_line 
 #' geom_point geom_tile scale_x_discrete scale_fill_manual theme theme_bw labs xlab ylab
+#' @import leaflet
+#' @importFrom mapview mapshot
 
 # @importFrom thematic thematic_shiny
 # thematic_shiny()
@@ -18,7 +20,8 @@ soe_server <- function(input, output, session){
     current_data = NULL,
     plot_bar = NULL,
     plot_heatmap = NULL,
-    plot_map = NULL
+    plot_map = NULL,
+    plot_i_map = NULL
   )
 
 
@@ -50,6 +53,14 @@ soe_server <- function(input, output, session){
         color_scheme = input$color_scheme_map,
         color_reverse = input$color_reverse_map,
         facet = input$facet_map)
+      },
+      "i_map" = {list(
+        z = input$z_axis,
+        map_type = input$i_map_spatial,
+        log_scale = input$log_i_map,
+        color_scheme = input$color_scheme_i_map,
+        color_reverse = input$color_reverse_i_map,
+        facet = input$facet_map)
       }
     )
     df$current_values <- current_vals
@@ -57,7 +68,8 @@ soe_server <- function(input, output, session){
     variable_lookup <- switch(input$tabs,
       "bar" = {current_vals[c("x", "color")]},
       "heatmap" = {current_vals[c("x", "y", "facet")]}, # "facet"
-      "map" = {current_vals[c("map_type", "facet")]}) # "facet"
+      "map" = {current_vals[c("map_type", "facet")]},
+      "i_map" = {current_vals[c("map_type", "facet")]}) # "facet"
 
     # determine which entry from xtab_list contains the requisite data
     df$lookup <- which(unlist(lapply(
@@ -80,6 +92,10 @@ soe_server <- function(input, output, session){
         pars = df$current_values)
       },
       "map" = {df$plot_map <- plot_map(
+        data = df$current_data,
+        pars = df$current_values)
+      },
+      "i_map" = {df$plot_i_map <- plot_i_map(
         data = df$current_data,
         pars = df$current_values)}
     )
@@ -110,12 +126,24 @@ soe_server <- function(input, output, session){
     )
     print(df$plot_map)
   })
+  output$i_map <- renderLeaflet({
+    validate(
+      need(df$plot_i_map, "Choose data to continue")
+    )
+    print(df$plot_i_map)
+  })
   
   # Download plot- ugly but works
   output$download_map <- downloadHandler(
     filename = "map_plot.png",
     content = function(file) {
       ggsave(file)
+    }
+  )
+  output$download_i_map <- downloadHandler(
+    filename = "i_map_plot.png",
+    content = function(file) {
+      mapshot(df$plot_i_map, file = "i_map_plot.png")
     }
   )
   output$download_bar <- downloadHandler(
