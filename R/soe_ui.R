@@ -91,6 +91,10 @@ soe_ui <- function(){
                 inputId = "map_taxon",
                 label = "Taxon"
               ),
+            year_dropdown(
+              inputId = "map_year",
+              label = "Years"
+            ),
             checkboxInput(
               inputId = "log_map",
               label = "Log scale",
@@ -122,6 +126,10 @@ soe_ui <- function(){
            taxon_dropdown(
              inputId = "i_map_taxon",
              label = "Taxon"
+           ),
+           year_dropdown(
+             inputId = "i_map_year",
+             label = "Years"
            ),
            checkboxInput(
              inputId = "log_i_map",
@@ -191,6 +199,24 @@ taxon_dropdown <- function(inputId, label) {
       "Other"
     ),
     selected = "All"
+  )
+}
+
+year_dropdown <- function(inputId, label) {
+  selectInput(
+    inputId = inputId,
+    label = label,
+    choices = c(
+      "All",
+      "1981-1985",
+      "1986-1990",
+      "1991-1995",
+      "1996-2000",
+      "2001-2005",
+      "2006-2010",
+      "2011-2015",
+      "2016-2020"
+    )
   )
 }
 

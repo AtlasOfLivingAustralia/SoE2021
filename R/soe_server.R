@@ -50,6 +50,7 @@ soe_server <- function(input, output, session){
         z = input$z_axis,
         map_type = input$map_spatial,
         taxon = input$map_taxon,
+        year = input$map_year,
         log_scale = input$log_map,
         color_scheme = input$color_scheme_map,
         color_reverse = input$color_reverse_map,
@@ -59,6 +60,7 @@ soe_server <- function(input, output, session){
         z = input$z_axis,
         map_type = input$i_map_spatial,
         taxon = input$i_map_taxon,
+        year = input$i_map_year,
         log_scale = input$log_i_map,
         color_scheme = input$color_scheme_i_map,
         color_reverse = input$color_reverse_i_map,
@@ -76,6 +78,11 @@ soe_server <- function(input, output, session){
     if (!is.null(current_vals$taxon) && current_vals$taxon != "All") {
       variable_lookup$taxon <- "taxon"
     }
+    
+    if (!is.null(current_vals$year) && current_vals$year != "All") {
+      variable_lookup$year_group <- "year_group"
+    }
+    
     # determine which entry from xtab_list contains the requisite data
     df$lookup <- which(unlist(lapply(
       strsplit(names(xtab_list), "::"),

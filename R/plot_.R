@@ -151,6 +151,10 @@ plot_map <- function(data, pars) {
     data <- data %>% filter(taxon == pars$taxon)
   }
   
+  if (!is.null(pars$year) && pars$year != "All") {
+    data <- data %>% filter(year_group == pars$year)
+  }
+  
   p <- ggplot(data) +
     geom_sf(aes_string(fill = z_var), color = "grey50", size = 0.2) +
     lims(x = c(110, 155), y = c(-45, -10)) +
@@ -182,6 +186,10 @@ plot_i_map <- function(data, pars) {
   
   if (!is.null(pars$taxon) && pars$taxon != "All") {
     data <- data %>% filter(taxon == pars$taxon)
+  }
+  
+  if (!is.null(pars$year) && pars$year != "All") {
+    data <- data %>% filter(year_group == pars$year)
   }
 
   data <- inner_join(ibra_map, data,
