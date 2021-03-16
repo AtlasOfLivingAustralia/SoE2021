@@ -49,8 +49,9 @@ soe_server <- function(input, output, session){
       "map" = {list(
         z = input$z_map,
         map_type = input$map_spatial,
-        taxon = input$map_taxon,
-        year = input$map_year,
+        taxon = input$taxon_map,
+        year = input$year_map,
+        basis = input$basis_map,
         log_scale = input$log_map,
         color_scheme = input$color_scheme_map,
         color_reverse = input$color_reverse_map,
@@ -59,8 +60,9 @@ soe_server <- function(input, output, session){
       "i_map" = {list(
         z = input$z_i_map,
         map_type = input$i_map_spatial,
-        taxon = input$i_map_taxon,
-        year = input$i_map_year
+        taxon = input$taxon_i_map,
+        year = input$year_i_map,
+        basis = input$basis_i_map
         #log_scale = input$log_i_map,
       )
       }
@@ -72,6 +74,7 @@ soe_server <- function(input, output, session){
       "heatmap" = {current_vals[c("x", "y", "facet")]}, # "facet"
       "map" = { current_vals[c("map_type", "facet")]},
       "i_map" = {current_vals[c("map_type")]}) # "facet"
+    
     if (!is.null(current_vals$taxon) && current_vals$taxon != "All") {
       variable_lookup$taxon <- "taxon"
     }
@@ -80,13 +83,17 @@ soe_server <- function(input, output, session){
       variable_lookup$year_group <- "year_group"
     }
     
+    if (!is.null(current_vals$basis) && current_vals$basis != "All") {
+      variable_lookup$basisOfRecord <- "basisOfRecord"
+    }
+
     # determine which entry from xtab_list contains the requisite data
     df$lookup <- which(unlist(lapply(
       strsplit(names(xtab_list), "::"),
       function(a, x){all(a %in% x) & length(a) == length(x)},
       x = unlist(unique(variable_lookup[variable_lookup != "none"]))
     )))
-
+    
     # save to 'current_data'
     df$current_data <- xtab_list[[df$lookup]]
     

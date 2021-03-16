@@ -125,7 +125,6 @@ plot_heatmap <- function(data, pars){
 }
 
 plot_map <- function(data, pars) {
-
   # join data to state/ibra map
   if(pars$log_scale){
     z_var <- paste0("log(", pars$z, ")")
@@ -147,12 +146,16 @@ plot_map <- function(data, pars) {
                        by = c("REG_NAME_7" = "iBRA7Regions"))
   }
   
-  if (!is.null(pars$taxon) && pars$taxon != "All") {
+  if (pars$taxon != "All") {
     data <- data %>% filter(taxon == pars$taxon)
   }
   
-  if (!is.null(pars$year) && pars$year != "All") {
+  if (pars$year != "All") {
     data <- data %>% filter(year_group == pars$year)
+  }
+  
+  if (pars$basis != "All") {
+    data <- data %>% filter(basisOfRecord == pars$basis)
   }
   
   p <- ggplot(data) +
@@ -190,14 +193,16 @@ plot_i_map <- function(data, pars) {
   #  z_var <- pars$z
   #}
   
-  
-  
-  if (!is.null(pars$taxon) && pars$taxon != "All") {
+  if (pars$taxon != "All") {
     data <- data %>% filter(taxon == pars$taxon)
   }
   
-  if (!is.null(pars$year) && pars$year != "All") {
+  if (pars$year != "All") {
     data <- data %>% filter(year_group == pars$year)
+  }
+  
+  if (pars$basis != "All") {
+    data <- data %>% filter(basisOfRecord == pars$basis)
   }
 
   data <- inner_join(ibra_map, data,

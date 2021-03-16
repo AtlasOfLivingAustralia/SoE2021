@@ -87,14 +87,9 @@ soe_ui <- function(){
                  "States" = "australianStatesAndTerritories",
                  "IBRA Regions" = "iBRA7Regions"),
                selected = "states"),
-              taxon_dropdown(
-                inputId = "map_taxon",
-                label = "Taxon"
+              map_dropdowns(
+                suffix = "map"
               ),
-            year_dropdown(
-              inputId = "map_year",
-              label = "Years"
-            ),
             checkboxInput(
               inputId = "log_map",
               label = "Log scale",
@@ -123,13 +118,8 @@ soe_ui <- function(){
              choices = c(
                "IBRA Regions" = "iBRA7Regions"),
              selected = "iBRA7Regions"),
-           taxon_dropdown(
-             inputId = "i_map_taxon",
-             label = "Taxon"
-           ),
-           year_dropdown(
-             inputId = "i_map_year",
-             label = "Years"
+           map_dropdowns(
+             suffix = "i_map"
            )
            #checkboxInput(
            #  inputId = "log_i_map",
@@ -177,10 +167,20 @@ count_dropdown <- function(inputId, label){
       "Number of species" = "n_spp"))
 }
 
-taxon_dropdown <- function(inputId, label) {
+
+
+map_dropdowns <- function(suffix) {
+  list(
+    taxon_dropdown(suffix),
+    year_dropdown(suffix),
+    basis_dropdown(suffix)
+  )
+}
+
+taxon_dropdown <- function(suffix) {
   selectInput(
-    inputId = inputId,
-    label = label,
+    inputId = paste0("taxon_", suffix),
+    label = "Taxon",
     choices = c(
       "All",
       "Birds",
@@ -197,10 +197,10 @@ taxon_dropdown <- function(inputId, label) {
   )
 }
 
-year_dropdown <- function(inputId, label) {
+year_dropdown <- function(suffix) {
   selectInput(
-    inputId = inputId,
-    label = label,
+    inputId = paste0("year_", suffix),
+    label = "Years",
     choices = c(
       "All",
       "1981-1985",
@@ -214,6 +214,20 @@ year_dropdown <- function(inputId, label) {
     )
   )
 }
+
+basis_dropdown <- function(suffix) {
+  selectInput(
+    inputId = paste0("basis_", suffix),
+    label = "Basis of record",
+    choices = c(
+      "All" = "All",
+      "Human observation" = "HumanObservation",
+      "Preserved specimen" = "PreservedSpecimen",
+      "Other" = "Other"
+    )
+  )
+}
+
 
 add_color_options <- function(suffix){
   list(
