@@ -78,7 +78,7 @@ soe_ui <- function(){
         sidebarLayout(
           sidebarPanel(
             count_dropdown(
-              inputId = "z_axis",
+              inputId = "z_map",
               label = "Counts:"),
              selectInput(
                inputId = "map_spatial",
@@ -115,7 +115,7 @@ soe_ui <- function(){
         sidebarLayout(
          sidebarPanel(
            count_dropdown(
-             inputId = "z_axis",
+             inputId = "z_i_map",
              label = "Counts:"),
            selectInput(
              inputId = "i_map_spatial",
@@ -130,16 +130,11 @@ soe_ui <- function(){
            year_dropdown(
              inputId = "i_map_year",
              label = "Years"
-           ),
-           checkboxInput(
-             inputId = "log_i_map",
-             label = "Log scale",
-             value = FALSE),
-           category_dropdown(
-             inputId = "facet_i_map",
-             label = "Facet:",
-             selected = "None", include_none = TRUE),
-           add_color_options(suffix = "i_map")
+           )
+           #checkboxInput(
+           #  inputId = "log_i_map",
+           #  label = "Log scale",
+          #   value = FALSE),
          ),
          mainPanel(
            leafletOutput(outputId = "i_map", width = "100%", height = "75vh")

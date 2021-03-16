@@ -178,11 +178,19 @@ plot_map <- function(data, pars) {
 
 
 plot_i_map <- function(data, pars) {
-  if(pars$log_scale){
-    z_var <- paste0("log(", pars$z, ")")
-  }else{
-    z_var <- pars$z
+  if (pars$z == "n_records") {
+    title <- "Record Count"
+  } else {
+    title <- "Species Count"
   }
+  
+  #if(pars$log_scale){
+  #  z_var <- paste0("log(", pars$z, ")")
+  #}else{
+  #  z_var <- pars$z
+  #}
+  
+  
   
   if (!is.null(pars$taxon) && pars$taxon != "All") {
     data <- data %>% filter(taxon == pars$taxon)
@@ -213,7 +221,7 @@ plot_i_map <- function(data, pars) {
                   textsize = "12px",
                   direction = "auto")) %>%
     addLegend("bottomright", pal = colPal, values = data[[z_var]],
-              title = "Records Count",
+              title = title,
               opacity = 1)
   return(p)
 }
@@ -255,11 +263,11 @@ state_abb <- function(states) {
 # TODO: enable taxa and period-specific labels
 build_labels <- function(data, pars, z_var) {
   taxa <- pars$taxon
-  period <- c(0, 2030)
+  period <- pars$year
   if (pars$map_type == "iBRA7Regions") {
-    labels <- sprintf("<strong>%s</strong><br/>Code: %s<br/>ID: %g<br/>Area (km<sup>2</sup>): %g<br/><br/><strong>Taxa: %s</strong><br/>Period: %g - %g<br/>Records Count: %g",
+    labels <- sprintf("<strong>%s</strong><br/>Code: %s<br/>ID: %g<br/>Area (km<sup>2</sup>): %g<br/><br/><strong>Taxa: %s</strong><br/>Period: %s<br/>Records Count: %g",
                       data$REG_NAME_7, data$REG_CODE_7, data$REC_ID, data$SQ_KM,
-                      taxa, period[1], period[length(period)], data[[z_var]]) %>%
+                      taxa, period, data[[z_var]]) %>%
       lapply(htmltools::HTML)
   } else if (pars$map_type == "IMCRA") {
     labels <- sprintf("<strong>%s</strong><br/>Code: %s<br/>ID: %g<br/>Area (km<sup>2</sup>): %g<br/><br/><strong>Taxa: %s</strong><br/>Records Count: %g",

@@ -47,7 +47,7 @@ soe_server <- function(input, output, session){
           facet = input$facet_heatmap)
       },
       "map" = {list(
-        z = input$z_axis,
+        z = input$z_map,
         map_type = input$map_spatial,
         taxon = input$map_taxon,
         year = input$map_year,
@@ -57,14 +57,12 @@ soe_server <- function(input, output, session){
         facet = input$facet_map)
       },
       "i_map" = {list(
-        z = input$z_axis,
+        z = input$z_i_map,
         map_type = input$i_map_spatial,
         taxon = input$i_map_taxon,
-        year = input$i_map_year,
-        log_scale = input$log_i_map,
-        color_scheme = input$color_scheme_i_map,
-        color_reverse = input$color_reverse_i_map,
-        facet = input$facet_map)
+        year = input$i_map_year
+        #log_scale = input$log_i_map,
+      )
       }
     )
     df$current_values <- current_vals
@@ -73,8 +71,7 @@ soe_server <- function(input, output, session){
       "bar" = {current_vals[c("x", "color")]},
       "heatmap" = {current_vals[c("x", "y", "facet")]}, # "facet"
       "map" = { current_vals[c("map_type", "facet")]},
-      "i_map" = {current_vals[c("map_type", "facet")]}) # "facet"
-
+      "i_map" = {current_vals[c("map_type")]}) # "facet"
     if (!is.null(current_vals$taxon) && current_vals$taxon != "All") {
       variable_lookup$taxon <- "taxon"
     }
