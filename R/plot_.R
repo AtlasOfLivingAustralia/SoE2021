@@ -1,6 +1,6 @@
 #' @importFrom viridisLite viridis
 #' @import ozmaps
-#' @importFrom dplyr inner_join
+#' @importFrom dplyr inner_join filter
 
 plot_bar <- function(data, pars){
 
@@ -125,6 +125,7 @@ plot_heatmap <- function(data, pars){
 }
 
 plot_map <- function(data, pars) {
+
   # join data to state/ibra map
   if(pars$log_scale){
     z_var <- paste0("log(", pars$z, ")")
@@ -145,6 +146,11 @@ plot_map <- function(data, pars) {
     data <- inner_join(ibra_map, data,
                        by = c("REG_NAME_7" = "iBRA7Regions"))
   }
+  
+  if (!is.null(pars$taxon) && pars$taxon != "All") {
+    data <- data %>% filter(taxon == pars$taxon)
+  }
+  
   p <- ggplot(data) +
     geom_sf(aes_string(fill = z_var), color = "grey50", size = 0.2) +
     lims(x = c(110, 155), y = c(-45, -10)) +
@@ -168,11 +174,14 @@ plot_map <- function(data, pars) {
 
 
 plot_i_map <- function(data, pars) {
-  
   if(pars$log_scale){
     z_var <- paste0("log(", pars$z, ")")
   }else{
     z_var <- pars$z
+  }
+  
+  if (!is.null(pars$taxon) && pars$taxon != "All") {
+    data <- data %>% filter(taxon == pars$taxon)
   }
 
   data <- inner_join(ibra_map, data,
@@ -237,7 +246,7 @@ state_abb <- function(states) {
 
 # TODO: enable taxa and period-specific labels
 build_labels <- function(data, pars, z_var) {
-  taxa <- "All"
+  taxa <- pars$taxon
   period <- c(0, 2030)
   if (pars$map_type == "iBRA7Regions") {
     labels <- sprintf("<strong>%s</strong><br/>Code: %s<br/>ID: %g<br/>Area (km<sup>2</sup>): %g<br/><br/><strong>Taxa: %s</strong><br/>Period: %g - %g<br/>Records Count: %g",

@@ -49,6 +49,7 @@ soe_server <- function(input, output, session){
       "map" = {list(
         z = input$z_axis,
         map_type = input$map_spatial,
+        taxon = input$map_taxon,
         log_scale = input$log_map,
         color_scheme = input$color_scheme_map,
         color_reverse = input$color_reverse_map,
@@ -57,6 +58,7 @@ soe_server <- function(input, output, session){
       "i_map" = {list(
         z = input$z_axis,
         map_type = input$i_map_spatial,
+        taxon = input$i_map_taxon,
         log_scale = input$log_i_map,
         color_scheme = input$color_scheme_i_map,
         color_reverse = input$color_reverse_i_map,
@@ -68,9 +70,12 @@ soe_server <- function(input, output, session){
     variable_lookup <- switch(input$tabs,
       "bar" = {current_vals[c("x", "color")]},
       "heatmap" = {current_vals[c("x", "y", "facet")]}, # "facet"
-      "map" = {current_vals[c("map_type", "facet")]},
+      "map" = { current_vals[c("map_type", "facet")]},
       "i_map" = {current_vals[c("map_type", "facet")]}) # "facet"
 
+    if (!is.null(current_vals$taxon) && current_vals$taxon != "All") {
+      variable_lookup$taxon <- "taxon"
+    }
     # determine which entry from xtab_list contains the requisite data
     df$lookup <- which(unlist(lapply(
       strsplit(names(xtab_list), "::"),
@@ -80,7 +85,7 @@ soe_server <- function(input, output, session){
 
     # save to 'current_data'
     df$current_data <- xtab_list[[df$lookup]]
-
+    
     # draw
     switch(input$tabs,
       "bar" = {df$plot_bar <- plot_bar(

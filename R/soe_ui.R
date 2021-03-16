@@ -87,6 +87,10 @@ soe_ui <- function(){
                  "States" = "australianStatesAndTerritories",
                  "IBRA Regions" = "iBRA7Regions"),
                selected = "states"),
+              taxon_dropdown(
+                inputId = "map_taxon",
+                label = "Taxon"
+              ),
             checkboxInput(
               inputId = "log_map",
               label = "Log scale",
@@ -115,6 +119,10 @@ soe_ui <- function(){
              choices = c(
                "IBRA Regions" = "iBRA7Regions"),
              selected = "iBRA7Regions"),
+           taxon_dropdown(
+             inputId = "i_map_taxon",
+             label = "Taxon"
+           ),
            checkboxInput(
              inputId = "log_i_map",
              label = "Log scale",
@@ -164,6 +172,26 @@ count_dropdown <- function(inputId, label){
     choices = c(
       "Number of records" = "n_records",
       "Number of species" = "n_spp"))
+}
+
+taxon_dropdown <- function(inputId, label) {
+  selectInput(
+    inputId = inputId,
+    label = label,
+    choices = c(
+      "All",
+      "Birds",
+      "Reptiles",
+      "Plants",
+      "Invertebrates",
+      "Amphibians",
+      "Mammals",
+      "Fungi",
+      "Other Vertebrates",
+      "Other"
+    ),
+    selected = "All"
+  )
 }
 
 add_color_options <- function(suffix){
