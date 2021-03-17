@@ -8,7 +8,9 @@ soe_ui <- function(){
   fluidPage(
     app_style(),
     titlePanel("State of the Environment 2021"),
-    theme = bs_theme(version = 4, bootswatch = "minty", secondary = "#F26649"),
+    theme = bs_theme(version = 4, bootswatch = "minty",
+                     primary = ala_cols("flamingo"),
+                     secondary = ala_cols("silver")),
     tabsetPanel(
       id = "tabs",
       type = "pills",
@@ -240,7 +242,6 @@ app_style <- function() {
         font-family: Lato;
         font-weight: normal;
       }
-      
       body { font-family: Roboto; }"))
   )
 }
