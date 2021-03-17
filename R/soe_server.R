@@ -4,8 +4,7 @@
 #'
 #' @importFrom shiny observeEvent reactiveValues renderPlot plotOutput
 #' @importFrom galah ala_config
-#' @importFrom ggplot2 ggplot ggsave aes aes_string element_blank facet_wrap geom_bar geom_line 
-#' geom_point geom_tile scale_x_discrete scale_fill_manual theme theme_bw labs xlab ylab
+#' @import ggplot2
 #' @import leaflet
 #' @importFrom mapview mapshot
 
@@ -23,7 +22,6 @@ soe_server <- function(input, output, session){
     plot_map = NULL,
     plot_i_map = NULL
   )
-
 
   # observeEvent(input$redraw, {
   observe({

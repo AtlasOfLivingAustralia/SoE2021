@@ -3,7 +3,6 @@
 #' @importFrom dplyr inner_join filter
 
 plot_bar <- function(data, pars){
-
   ## test code for ordering factor levels (fails)
   # data_tr <- data[order(data[[y]], decreasing = FALSE), ]
   # data_tr[[pars$x]] <- factor(data_tr[[pars$x]],
@@ -14,21 +13,19 @@ plot_bar <- function(data, pars){
     data$australianStatesAndTerritories <-
       state_abb(data$australianStatesAndTerritories)
   }
-
-  if(pars$log_scale){
-    y_var <- paste0("log(", pars$y, ")")
-  }else{
-    y_var <- pars$y
-  }
-
+  y_var <- log_var(pars$y, pars$log_scale)
   if(pars$color == "none"){
 
     # choose a colour
-    palette <- viridisLite::viridis(
-      n = 1,
-      option = pars$color_scheme,
-      begin = 0.5)
-
+    if (pars$color_scheme == "ala") {
+      palette <- ala_pal(1)
+    } else {
+      palette <- viridisLite::viridis(
+        n = 1,
+        option = pars$color_scheme,
+        begin = 0.5)
+    }
+    
     # draw
     p <- ggplot(data,
       aes_string(
@@ -36,27 +33,30 @@ plot_bar <- function(data, pars){
         y = y_var)) +
       geom_bar(stat = "identity", color = palette, fill = palette) +
       theme_bw() +
-      labs(x = label_name(pars$x), y = label_name(pars$y, pars$log_scale))
+      labs(x = label_name(pars$x), y = label_name(pars$y, pars$log_scale)) +
+      bar_style()
 
   }else{
 
     # set color direction
-    if(pars$color_reverse){
-      palette_direction <- -1
-    }else{
-      palette_direction <- 1
-    }
+    palette_direction <- palette_dir(pars$color_reverse)
 
     # set palette etc
     color <- pars$color
     color_n <- length(unique(data[[pars$color]]))
-    palette <- viridisLite::viridis(
-      n = color_n,
-      option = pars$color_scheme,
-      direction = palette_direction,
-      begin = 0.1,
-      end = 0.9)
-
+    
+    
+    if (pars$color_scheme == "ala") {
+      palette <- ala_pal(color_n, reverse = pars$color_reverse)
+    } else {
+      palette <- viridisLite::viridis(
+        n = color_n,
+        option = pars$color_scheme,
+        direction = palette_direction,
+        begin = 0.1,
+        end = 0.9)
+    }
+    
     # draw
     p <- ggplot(data,
       aes_string(
@@ -64,25 +64,20 @@ plot_bar <- function(data, pars){
         y = y_var,
         color = color,
         fill = color)) +
-      geom_bar(stat = "identity") +
+      geom_bar(stat = "identity", position = position_dodge()) +
       scale_fill_manual(
         values = palette,
         aesthetics = c("fill", "color")) +
       theme_bw() + labs(x = label_name(pars$x),
-                        y = label_name(pars$y, pars$log_scale))
+                        y = label_name(pars$y, pars$log_scale),
+                        fill = label_name(pars$color),
+                        color = label_name(pars$color)) +
+      bar_style()
   }
 
   return(p)
 
 }
-
-# # facet
-# if(is.null(input$time_facet)){
-#   facet <- NULL
-# }else{
-#   facet <- ggplot2::facet_wrap(ggplot2::vars(input$time_facet))
-# }
-
 
 plot_heatmap <- function(data, pars){
 
@@ -92,31 +87,29 @@ plot_heatmap <- function(data, pars){
   }
 
   # set log scale
-  if(pars$log_scale){
-    z_var <- paste0("log(", pars$z, ")")
-  }else{
-    z_var <- pars$z
-  }
+  z_var <- log_var(pars$z, pars$log_scale)
 
   # set color direction
-  if(pars$color_reverse){
-    palette_direction <- -1
-  }else{
-    palette_direction <- 1
-  }
+  palette_direction <- palette_dir(pars$color_reverse)
 
+  if (pars$color_scheme == "ala") {
+    scale_fill <- scale_fill_gradientn(colours = ala_pal(2, pars$color_reverse))
+  } else {
+    scale_fill <- scale_fill_viridis(
+      option = pars$color_scheme,
+      direction = palette_direction)
+  }
   p <- ggplot(data,
     aes_string(
       x = pars$x, # colnames(data)[1],
       y = pars$y,
       fill = z_var)) +
     geom_tile() +
-    scale_fill_viridis(
-      option = pars$color_scheme,
-      direction = palette_direction) +
+    scale_fill +
     theme_bw() + labs(x = label_name(pars$x),
                       y = label_name(pars$y),
-                      fill = label_name(pars$z, pars$log_scale))
+                      fill = label_name(pars$z, pars$log_scale)) +
+    axes_style()
   if (pars$facet != "none") {
     p <- p + facet_wrap(as.formula(paste("~", pars$facet)))
   }
@@ -125,45 +118,20 @@ plot_heatmap <- function(data, pars){
 }
 
 plot_map <- function(data, pars) {
-  # join data to state/ibra map
-  if(pars$log_scale){
-    z_var <- paste0("log(", pars$z, ")")
-  }else{
-    z_var <- pars$z
-  }
   
-  if(pars$color_reverse){
-    palette_direction <- -1
-  }else{
-    palette_direction <- 1
-  }
+  z_var <- log_var(pars$z, pars$log_scale)
+
+  palette_direction <- palette_dir(pars$color_reverse)
   
-  if(pars$map_type == "australianStatesAndTerritories") {
-    data <- inner_join(ozmaps::ozmap_states, data,
-                       by = c("NAME" = "australianStatesAndTerritories"))
-  } else {
-    data <- inner_join(ibra_map, data,
-                       by = c("REG_NAME_7" = "iBRA7Regions"))
-  }
-  
-  if (pars$taxon != "All") {
-    data <- data %>% filter(taxon == pars$taxon)
-  }
-  
-  if (pars$year != "All") {
-    data <- data %>% filter(year_group == pars$year)
-  }
-  
-  if (pars$basis != "All") {
-    data <- data %>% filter(basisOfRecord == pars$basis)
-  }
+  data <- build_map_data(data, pars)
   
   p <- ggplot(data) +
     geom_sf(aes_string(fill = z_var), color = "grey50", size = 0.2) +
     lims(x = c(110, 155), y = c(-45, -10)) +
-    scale_fill_viridis(
-      option = pars$color_scheme,
-      direction = palette_direction) +
+    scale_fill_gradientn(colours = ala_pal(2, pars$color_reverse)) +
+    #scale_fill_viridis(
+    #  option = pars$color_scheme,
+    #  direction = palette_direction) +
     theme_bw() +
     labs(fill = label_name(pars$z, pars$log_scale)) +
     # remove axes labels
@@ -193,20 +161,7 @@ plot_i_map <- function(data, pars) {
   #  z_var <- pars$z
   #}
   
-  if (pars$taxon != "All") {
-    data <- data %>% filter(taxon == pars$taxon)
-  }
-  
-  if (pars$year != "All") {
-    data <- data %>% filter(year_group == pars$year)
-  }
-  
-  if (pars$basis != "All") {
-    data <- data %>% filter(basisOfRecord == pars$basis)
-  }
-
-  data <- inner_join(ibra_map, data,
-                     by = c("REG_NAME_7" = "iBRA7Regions"))
+  data <- build_map_data(data, pars)
   
   colPalette <- "Reds" 
   colPal <- colorNumeric(
@@ -285,4 +240,52 @@ build_labels <- function(data, pars, z_var) {
   } else {
     print('Not a valid region name.')  
   }
+}
+
+build_map_data <- function(data, pars) {
+  if (pars$taxon != "All") {
+    data <- data %>% filter(taxon == pars$taxon)
+  }
+  if (pars$year != "All") {
+    data <- data %>% filter(year_group == pars$year)
+  }
+  if (pars$basis != "All") {
+    data <- data %>% filter(basisOfRecord == pars$basis)
+  }
+  
+  if (pars$map_type == "australianStatesAndTerritories") {
+    data <- inner_join(ozmaps::ozmap_states, data,
+                       by = c("NAME" = "australianStatesAndTerritories"))
+  } else {
+    data <- inner_join(ibra_map, data,
+                       by = c("REG_NAME_7" = "iBRA7Regions"))
+  }
+  data
+}
+
+palette_dir <- function(reverse) {
+  if(reverse){
+    palette_direction <- -1
+  }else{
+    palette_direction <- 1
+  }
+  palette_direction
+}
+
+log_var <- function(var, log_scale) {
+  if(log_scale){
+    var <- paste0("log(", var, ")")
+  }
+  return(var)
+}
+
+bar_style <- function() {
+  axes_style() + theme(legend.position = "bottom")
+}
+
+axes_style <- function() {
+  theme(
+    axis.title = element_text(family = "Roboto"),
+    axis.text = element_text(family = "Roboto")
+  )
 }

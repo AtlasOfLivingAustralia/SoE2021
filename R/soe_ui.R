@@ -6,6 +6,7 @@
 
 soe_ui <- function(){
   fluidPage(
+    app_style(),
     titlePanel("State of the Environment 2021"),
     theme = bs_theme(version = 4, bootswatch = "minty", secondary = "#F26649"),
     tabsetPanel(
@@ -228,6 +229,21 @@ basis_dropdown <- function(suffix) {
   )
 }
 
+app_style <- function() {
+  tags$head(
+    # Note the wrapping of the string in HTML()
+    tags$style(HTML("
+      @import url(https://fonts.googleapis.com/css?family=Lato);
+      @import url(https://fonts.googleapis.com/css?family=Roboto);
+      
+      h2 {
+        font-family: Lato;
+        font-weight: normal;
+      }
+      
+      body { font-family: Roboto; }"))
+  )
+}
 
 add_color_options <- function(suffix){
   list(
@@ -235,6 +251,7 @@ add_color_options <- function(suffix){
       inputId = paste0("color_scheme_", suffix),
       label = "Colour scheme:",
       choices = c(
+        "ala",
         "viridis",
         "magma",
         "inferno",
