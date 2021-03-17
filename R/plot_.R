@@ -186,7 +186,7 @@ plot_i_map <- function(data, pars) {
   } else {
     title <- "Species Count"
   }
-  
+  z_var <- pars$z
   #if(pars$log_scale){
   #  z_var <- paste0("log(", pars$z, ")")
   #}else{
