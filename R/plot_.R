@@ -129,21 +129,28 @@ plot_map <- function(data, pars) {
   
   data <- build_map_data(data, pars)
   
+  if (pars$color_scheme == "ala") {
+    scale_fill <- scale_fill_gradientn(colours = ala_pal(2, pars$color_reverse),
+                                       labels = comma)
+  } else {
+    scale_fill <- scale_fill_viridis(option = pars$color_scheme,
+                                     direction = palette_direction,
+                                     labels = comma)
+  }
+  
   p <- ggplot(data) +
-    geom_sf(aes_string(fill = z_var), color = "grey50", size = 0.2) +
+    geom_sf(aes_string(fill = z_var), color = "grey50", size = 0.02) +
     lims(x = c(110, 155), y = c(-45, -10)) +
-    scale_fill_gradientn(colours = ala_pal(2, pars$color_reverse),
-                         labels = comma) +
-    #scale_fill_viridis(
-    #  option = pars$color_scheme,
-    #  direction = palette_direction) +
+    scale_fill +
     theme_bw() +
     labs(fill = label_name(pars$z, pars$log_scale)) +
     # remove axes labels
     theme(
       axis.text.x = element_blank(),
       axis.text.y = element_blank(),
-      axis.ticks = element_blank()
+      axis.ticks = element_blank(),
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank()
     )
   
   if (pars$facet != "none") {
