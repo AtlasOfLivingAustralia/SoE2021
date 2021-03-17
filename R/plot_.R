@@ -1,6 +1,7 @@
 #' @importFrom viridisLite viridis
 #' @import ozmaps
 #' @importFrom dplyr inner_join filter
+#' @importFrom scales comma
 
 plot_bar <- function(data, pars){
   ## test code for ordering factor levels (fails)
@@ -34,7 +35,7 @@ plot_bar <- function(data, pars){
       geom_bar(stat = "identity", color = palette, fill = palette) +
       theme_bw() +
       labs(x = label_name(pars$x), y = label_name(pars$y, pars$log_scale)) +
-      bar_style()
+      bar_style() + scale_y_continuous(labels = comma)
 
   }else{
 
@@ -67,7 +68,8 @@ plot_bar <- function(data, pars){
       geom_bar(stat = "identity", position = position_dodge()) +
       scale_fill_manual(
         values = palette,
-        aesthetics = c("fill", "color")) +
+        aesthetics = c("fill", "color"),
+        labels = comma) +
       theme_bw() + labs(x = label_name(pars$x),
                         y = label_name(pars$y, pars$log_scale),
                         fill = label_name(pars$color),
@@ -93,11 +95,13 @@ plot_heatmap <- function(data, pars){
   palette_direction <- palette_dir(pars$color_reverse)
 
   if (pars$color_scheme == "ala") {
-    scale_fill <- scale_fill_gradientn(colours = ala_pal(2, pars$color_reverse))
+    scale_fill <- scale_fill_gradientn(colours = ala_pal(2, pars$color_reverse),
+                                       labels = comma)
   } else {
     scale_fill <- scale_fill_viridis(
       option = pars$color_scheme,
-      direction = palette_direction)
+      direction = palette_direction,
+      labels = comma)
   }
   p <- ggplot(data,
     aes_string(
@@ -128,7 +132,8 @@ plot_map <- function(data, pars) {
   p <- ggplot(data) +
     geom_sf(aes_string(fill = z_var), color = "grey50", size = 0.2) +
     lims(x = c(110, 155), y = c(-45, -10)) +
-    scale_fill_gradientn(colours = ala_pal(2, pars$color_reverse)) +
+    scale_fill_gradientn(colours = ala_pal(2, pars$color_reverse),
+                         labels = comma) +
     #scale_fill_viridis(
     #  option = pars$color_scheme,
     #  direction = palette_direction) +
@@ -174,7 +179,8 @@ plot_i_map <- function(data, pars) {
     addTiles() %>%
     addPolygons(fillColor = colPal(data[[z_var]]),
                 fillOpacity = .8, color = "#111111", weight = 1, stroke = TRUE,
-                highlightOptions = highlightOptions(color = "#222222", weight = 3, bringToFront = TRUE),
+                highlightOptions = highlightOptions(color = "#222222", weight = 3,
+                                                    bringToFront = TRUE),
                 label = build_labels(data, pars, z_var),
                 labelOptions = labelOptions(
                   style = list("font-weight" = "normal", padding = "3px 5px"),
