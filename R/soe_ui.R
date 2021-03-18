@@ -167,7 +167,7 @@ count_dropdown <- function(inputId, label){
     label = label,
     choices = c(
       "Number of records" = "n_records",
-      "Number of species" = "n_spp"))
+      "Number of species" = "n_species"))
 }
 
 
