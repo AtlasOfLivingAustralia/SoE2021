@@ -13,9 +13,9 @@ build_soe_app <- function(
 
   # store data in a single place
   app_data <- list(
-    ibra = "ibra", # note internal data are quoted - for some reason this works
-    lookup = "lookup_df",
-    counts = "data_list")
+    ibra = "ibra")# , # note internal data are quoted - for some reason this works
+    # lookup = "lookup_df",
+    # counts = "data_list")
 
   # build app file structure
   if(dir.exists(name)) {

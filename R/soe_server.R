@@ -66,35 +66,35 @@ soe_server <- function(input, output, session){
       }
     )
     df$current_values <- current_vals
-    
+
     variable_lookup <- switch(input$tabs,
       "bar" = {current_vals[c("x", "color")]},
       "heatmap" = {current_vals[c("x", "y", "facet")]}, # "facet"
       "map" = { current_vals[c("map_type", "facet")]},
       "i_map" = {current_vals[c("map_type")]}) # "facet"
-    
+
     if (!is.null(current_vals$taxon) && current_vals$taxon != "All") {
       variable_lookup$taxon <- "taxon"
     }
-    
+
     if (!is.null(current_vals$year) && current_vals$year != "All") {
       variable_lookup$year_group <- "year_group"
     }
-    
+
     if (!is.null(current_vals$basis) && current_vals$basis != "All") {
       variable_lookup$basisOfRecord <- "basisOfRecord"
     }
 
     # determine which entry from xtab_list contains the requisite data
     df$lookup <- which(unlist(lapply(
-      strsplit(names(xtab_list), "::"),
+      strsplit(names(data_list), "::"),
       function(a, x){all(a %in% x) & length(a) == length(x)},
       x = unlist(unique(variable_lookup[variable_lookup != "none"]))
     )))
-    
+
     # save to 'current_data'
-    df$current_data <- xtab_list[[df$lookup]]
-    
+    df$current_data <- data_list[[df$lookup]]
+
     # draw
     switch(input$tabs,
       "bar" = {df$plot_bar <- plot_bar(
@@ -114,7 +114,7 @@ soe_server <- function(input, output, session){
         pars = df$current_values)}
     )
   })
-  
+
   # testing window
   # output$text_1 <- renderPrint({df$current_values})
   # output$text_2 <- renderPrint({df$current_values})
@@ -133,7 +133,7 @@ soe_server <- function(input, output, session){
     )
     print(df$plot_heatmap)
   })
-  
+
   output$map <- renderPlot({
     validate(
       need(df$plot_map, "Choose data to continue")
@@ -146,7 +146,7 @@ soe_server <- function(input, output, session){
     )
     print(df$plot_i_map)
   })
-  
+
   # Download plot- ugly but works
   output$download_map <- downloadHandler(
     filename = "map_plot.png",
@@ -172,7 +172,7 @@ soe_server <- function(input, output, session){
       ggsave(file)
     }
   )
-  
+
   # save modal
   #observeEvent(input$download_modal, {
   #  save_modal()
