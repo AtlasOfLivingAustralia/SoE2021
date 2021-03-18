@@ -144,7 +144,7 @@ category_dropdown <- function(inputId, label, selected, include_none = FALSE){
   choices_default <- c(
     "Year" = "year_group",
     "Taxon" = "taxon",
-    # "Threatened Status" = "threatened",
+    "Threatened Status" = "threatened_status",
     "Basis of Record" = "basisOfRecord",
     "States" = "australianStatesAndTerritories",
     "IBRA Regions" = "iBRA7Regions",
@@ -226,7 +226,16 @@ basis_dropdown <- function(suffix) {
       "All" = "All",
       "Human observation" = "HumanObservation",
       "Preserved specimen" = "PreservedSpecimen",
-      "Other" = "Other"
+      # "Not recorded" = "", # doesn't work for some reason
+      "Environmental DNA" = "EnvironmentalDNA",
+      "Machine observation" = "MachineObservation",
+      "Material sample" = "MaterialSample",
+      "Genomic DNA" = "GenomicDNA",
+      "Image" = "Image",
+      "LivingSpecimen" = "LivingSpecimen",
+      "Sound" = "Sound",
+      "FossilSpecimen" = "FossilSpecimen",
+      "Video" = "Video"
     )
   )
 }
@@ -237,7 +246,7 @@ app_style <- function() {
     tags$style(HTML("
       @import url(https://fonts.googleapis.com/css?family=Lato);
       @import url(https://fonts.googleapis.com/css?family=Roboto);
-      
+
       h2 {
         font-family: Lato;
         font-weight: normal;
