@@ -68,8 +68,7 @@ plot_bar <- function(data, pars){
       geom_bar(stat = "identity", position = position_dodge()) +
       scale_fill_manual(
         values = palette,
-        aesthetics = c("fill", "color"),
-        labels = comma) +
+        aesthetics = c("fill", "color")) +
       theme_bw() + labs(x = label_name(pars$x),
                         y = label_name(pars$y, pars$log_scale),
                         fill = label_name(pars$color),
