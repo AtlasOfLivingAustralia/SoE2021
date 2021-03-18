@@ -7,7 +7,7 @@
 #' @export build_soe_app
 
 build_soe_app <- function(
-  name = "test_app",
+  name = "soe_app",
   launch = TRUE
 ){
 
