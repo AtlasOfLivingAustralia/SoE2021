@@ -144,7 +144,7 @@ category_dropdown <- function(inputId, label, selected, include_none = FALSE){
   choices_default <- c(
     "Year" = "year_group",
     "Taxon" = "taxon",
-    "Threatened Status" = "threatened_status",
+    "Threat Status" = "threat_status",
     "Basis of Record" = "basisOfRecord",
     "States" = "australianStatesAndTerritories",
     "IBRA Regions" = "iBRA7Regions",
@@ -176,14 +176,15 @@ map_dropdowns <- function(suffix) {
   list(
     taxon_dropdown(suffix),
     year_dropdown(suffix),
-    basis_dropdown(suffix)
+    basis_dropdown(suffix),
+    threat_dropdown(suffix)
   )
 }
 
 taxon_dropdown <- function(suffix) {
   selectInput(
     inputId = paste0("taxon_", suffix),
-    label = "Taxon",
+    label = "Taxon:",
     choices = c(
       "All",
       "Birds",
@@ -203,7 +204,7 @@ taxon_dropdown <- function(suffix) {
 year_dropdown <- function(suffix) {
   selectInput(
     inputId = paste0("year_", suffix),
-    label = "Years",
+    label = "Years:",
     choices = c(
       "All",
       "1981-1985",
@@ -221,7 +222,7 @@ year_dropdown <- function(suffix) {
 basis_dropdown <- function(suffix) {
   selectInput(
     inputId = paste0("basis_", suffix),
-    label = "Basis of record",
+    label = "Basis of record:",
     choices = c(
       "All" = "All",
       "Human observation" = "HumanObservation",
@@ -236,6 +237,24 @@ basis_dropdown <- function(suffix) {
       "Sound" = "Sound",
       "FossilSpecimen" = "FossilSpecimen",
       "Video" = "Video"
+    )
+  )
+}
+
+threat_dropdown <- function(suffix) {
+  selectInput(
+    inputId = paste0("threat_", suffix),
+    label = "Threat status:",
+    choices = c(
+      "All",
+      "Not threatened",
+      "Conservation dependent",
+      "Vulnerable",
+      "Endangered",
+      "Critically Endangered",
+      "Extinct in the wild",
+      "Extinct",
+      "Weed of National Significance"
     )
   )
 }

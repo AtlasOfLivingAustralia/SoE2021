@@ -50,6 +50,7 @@ soe_server <- function(input, output, session){
         taxon = input$taxon_map,
         year = input$year_map,
         basis = input$basis_map,
+        threat = input$threat_map,
         log_scale = input$log_map,
         color_scheme = input$color_scheme_map,
         color_reverse = input$color_reverse_map,
@@ -60,11 +61,13 @@ soe_server <- function(input, output, session){
         map_type = input$i_map_spatial,
         taxon = input$taxon_i_map,
         year = input$year_i_map,
-        basis = input$basis_i_map
+        basis = input$basis_i_map,
+        threat = input$threat_i_map
         #log_scale = input$log_i_map,
       )
       }
     )
+
     df$current_values <- current_vals
 
     variable_lookup <- switch(input$tabs,
@@ -83,6 +86,10 @@ soe_server <- function(input, output, session){
 
     if (!is.null(current_vals$basis) && current_vals$basis != "All") {
       variable_lookup$basisOfRecord <- "basisOfRecord"
+    }
+    
+    if (!is.null(current_vals$basis) && current_vals$threat != "All") {
+      variable_lookup$threat_status <- "threat_status"
     }
 
     # determine which entry from xtab_list contains the requisite data

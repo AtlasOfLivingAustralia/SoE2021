@@ -204,7 +204,7 @@ label_name <- function(v, log = FALSE) {
   name <- switch(v,
          "year_group" = "Year",
          "taxon" = "Taxon",
-         # "threatened" = "Threatened Status",
+         "threat_status" = "Threat Status",
          "basisOfRecord" = "Basis of Record",
          "australianStatesAndTerritories" = "States",
          "iBRA7Regions" = "IBRA Regions",
@@ -263,6 +263,9 @@ build_map_data <- function(data, pars) {
   }
   if (pars$basis != "All") {
     data <- data %>% filter(basisOfRecord == pars$basis)
+  }
+  if (pars$threat != "All") {
+    data <- data %>% filter(threat_status == pars$threat)
   }
   
   if (pars$map_type == "australianStatesAndTerritories") {
