@@ -30,6 +30,8 @@ ala_palettes <- list(
   "1" = ala_cols("flamingo"),
   "2" = ala_cols("concrete", "flamingo"),
   "3" = ala_cols("flamingo", "silver", "charcoal"),
+  "6" = ala_cols("flamingo", "honey", "pale_moss", "seafoam", "ocean",
+                 "lavender"),
   "7" = ala_cols("flamingo", "honey", "pale_moss", "seafoam", "ocean",
                  "lavender", "plum"),
   "8" = ala_cols("flamingo", "honey", "pale_moss", "seafoam", "ocean",
