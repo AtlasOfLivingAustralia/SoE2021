@@ -87,8 +87,7 @@ build_wons_df <- function(){
   save(wons_df, file = "./SoE2021/data/wons_df.RData")
 }
 
-
-# Sub-functions to support corss-tabulation by various categories
+# Sub-functions to support cross-tabulation by various categories
 
 # group data by year
 add_year_group <- function(df){
@@ -130,7 +129,7 @@ add_taxon <- function(df){
 }
 
 # EPBC status
-add_threatened_status <- function(df){
+add_threat_status <- function(df){
   df$order <- seq_len(nrow(df))
   data_out <- merge(df,
     threatened_df[, c("taxon_concept_id",  "conservation_status")],
@@ -138,19 +137,21 @@ add_threatened_status <- function(df){
     by.y = "taxon_concept_id",
     all.x = TRUE,
     all.y = FALSE)
+  data_out$invasive <- add_invasive_spp(df)
   data_out <- data_out[order(data_out$order), ] # NOTE: this hasn't been checked
   # convert raw data to a numeric variable
   status_vector <- rep(1, nrow(data_out))
   status_vector[data_out$conservation_status == "Conservation dependent"] <- 2
   status_vector[data_out$conservation_status == "Vulnerable"] <- 3
-    status_vector[data_out$conservation_status == "Endangered"] <- 4
+  status_vector[data_out$conservation_status == "Endangered"] <- 4
   status_vector[data_out$conservation_status == "Critically Endangered"] <- 5
   status_vector[data_out$conservation_status == "Extinct in the wild"] <- 6
   status_vector[data_out$conservation_status == "Extinct"] <- 7
+  status_vector[data_out$invasive == TRUE] <- 8
   # convert to factor
   status_factor <- factor(
     status_vector,
-    levels = seq_len(7),
+    levels = seq_len(8),
     labels = c(
       "Not threatened",
       "Conservation dependent",
@@ -158,7 +159,8 @@ add_threatened_status <- function(df){
       "Endangered",
       "Critically Endangered",
       "Extinct in the wild",
-      "Extinct"))
+      "Extinct",
+      "Weed of National Significance"))
   return(status_factor)
 }
 
@@ -175,6 +177,7 @@ add_invasive_spp <- function(df){
   return(data_out$wons_included)
 }
 
+
 # aggregator function to group all relevant information at once.
 # Called by crosstab_ala_data.table()
 add_required_cols <- function(df, combns){
@@ -184,8 +187,8 @@ add_required_cols <- function(df, combns){
   if(any(combns == "taxon")){
     df$taxon <- add_taxon(df)
   }
-  if(any(combns == "threatened_status")){
-    df$threatened_status <- add_threatened_status(df)
+  if(any(combns == "threat_status")){
+    df$threat_status <- add_threat_status(df)
   }
   return(df)
 }
@@ -242,7 +245,7 @@ crosstab_ala_data.table <- function(files){
     "year_group",
     "taxon",
     "basisOfRecord",
-    "threatened_status",
+    "threat_status",
     "australianStatesAndTerritories",
     "iBRA7Regions",
     "national_parks")
@@ -264,7 +267,7 @@ crosstab_ala_data.table <- function(files){
 
   # now create list of combinations that we can populate with data
   data_list <- as.list(rep(NA, length(combination_list)))
-  exceptions_group <- c("year_group", "threatened_status", "taxon")
+  exceptions_group <- c("year_group", "threat_status", "taxon")
 
   for(a in seq_along(data_list)){ # c(8:length(data_list))){#
     combn_tr <- combination_list[[a]]
@@ -273,7 +276,7 @@ crosstab_ala_data.table <- function(files){
       if(any(combn_tr == "year_group")){
         included_vars <- c(included_vars, "year")
       }
-      if(any(combn_tr == "threatened_status")){
+      if(any(combn_tr == "threat_status")){
         included_vars <- c(included_vars, "species_guid")
       }
       if(any(combn_tr == "taxon")){
