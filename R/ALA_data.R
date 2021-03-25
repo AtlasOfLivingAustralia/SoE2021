@@ -87,6 +87,15 @@ build_wons_df <- function(){
   save(wons_df, file = "./SoE2021/data/wons_df.RData")
 }
 
+build_threats_df <- function(epbc, wons) {
+  wons$conservation_status <- "Weed"
+  in_wons <- wons[, c("species_guid", "conservation_status")]
+  colnames(in_wons)[1] <- "taxon_concept_id"
+  all_threats_df <- rbind(in_wons, epbc[,c("taxon_concept_id", "conservation_status")])
+  rownames(all_threats_df) <- all_threats_df$taxon_concept_id
+  save(all_threats_df, file = "./SoE2021/data/all_threats_df.RData")
+}
+
 # Sub-functions to support cross-tabulation by various categories
 
 # group data by year
@@ -128,16 +137,19 @@ add_taxon <- function(df){
   return(var_factor)
 }
 
-# EPBC status
-add_threat_status <- function(df){
+
+# Test add threat status
+add_threat_status <- function(df) {
+  # merge df with threatened df
+  # add WONS list to EPBC list
   df$order <- seq_len(nrow(df))
   data_out <- merge(df,
-    threatened_df[, c("taxon_concept_id",  "conservation_status")],
-    by.x = "species_guid",
-    by.y = "taxon_concept_id",
-    all.x = TRUE,
-    all.y = FALSE)
-  data_out$invasive <- add_invasive_spp(df)
+                    all_threats_df[, c("taxon_concept_id",  "conservation_status")],
+                    by.x = "species_guid",
+                    by.y = "taxon_concept_id",
+                    all.x = TRUE,
+                    all.y = FALSE)
+  
   data_out <- data_out[order(data_out$order), ] # NOTE: this hasn't been checked
   # convert raw data to a numeric variable
   status_vector <- rep(1, nrow(data_out))
@@ -147,7 +159,7 @@ add_threat_status <- function(df){
   status_vector[data_out$conservation_status == "Critically Endangered"] <- 5
   status_vector[data_out$conservation_status == "Extinct in the wild"] <- 6
   status_vector[data_out$conservation_status == "Extinct"] <- 7
-  status_vector[data_out$invasive == TRUE] <- 8
+  status_vector[data_out$conservation_status == "Weed"] <- 8
   # convert to factor
   status_factor <- factor(
     status_vector,
@@ -162,19 +174,6 @@ add_threat_status <- function(df){
       "Extinct",
       "Weed of National Significance"))
   return(status_factor)
-}
-
-# Invasive status
-add_invasive_spp <- function(df){
-  df$order <- seq_len(nrow(df))
-  data_out <- merge(df,
-    wons_df[, c("species_guid",  "wons_included")],
-    by = "species_guid",
-    all.x = TRUE,
-    all.y = FALSE)
-  data_out$wons_included[is.na(data_out$wons_included)] <- FALSE
-  data_out <- data_out[order(data_out$order), ] # NOTE: this hasn't been checked
-  return(data_out$wons_included)
 }
 
 
@@ -237,7 +236,6 @@ crosstab_ala_data.table <- function(files){
     national_park_numeric,
     levels = seq_len(2),
     labels = c("Other land use", "National Park"))
-  # data_in <- cbind(data_in, data.frame(national_parks = national_park_factor))
   data_in$national_parks <- national_park_factor
 
   # work out required combinations of variables
@@ -269,7 +267,7 @@ crosstab_ala_data.table <- function(files){
   data_list <- as.list(rep(NA, length(combination_list)))
   exceptions_group <- c("year_group", "threat_status", "taxon")
 
-  for(a in seq_along(data_list)){ # c(8:length(data_list))){#
+  for(a in seq_along(data_list)){
     combn_tr <- combination_list[[a]]
     if(any(combn_tr %in% exceptions_group)){
       included_vars <- combn_tr[!(combn_tr %in% exceptions_group)]
@@ -305,14 +303,13 @@ crosstab_ala_data.table <- function(files){
       (species_guid != ""),
       .(.N),
       keyby = combn_tr]
-    # xtab_species_count_final <- xtab_species_count[, .(sum(N)), keyby = combn_tr]
+
     colnames(xtab_species_count)[length(combn_tr) + 1] <- "n_species"
     result <- merge(xtab_final, xtab_species_count)
-
     data_list[[a]] <- result
     cat(paste0("Run ", a, " complete: ", Sys.time(), "\n"))
 
-  } # end loop
+} # end loop
 
   names(data_list) <- unlist(lapply(
     combination_list,
@@ -320,5 +317,4 @@ crosstab_ala_data.table <- function(files){
 
   # last stage is to export xtab list and a corresponding index data.frame
   save(data_list, file = "./SoE2021/data/data_list.RData")
-
 }
