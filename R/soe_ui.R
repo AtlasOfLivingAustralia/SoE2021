@@ -175,7 +175,7 @@ count_dropdown <- function(inputId, label){
 map_dropdowns <- function(suffix) {
   list(
     taxon_dropdown(suffix),
-    year_dropdown(suffix),
+    #year_dropdown(suffix),
     basis_dropdown(suffix),
     threat_dropdown(suffix)
   )

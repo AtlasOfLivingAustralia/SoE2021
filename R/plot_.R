@@ -258,9 +258,9 @@ build_map_data <- function(data, pars) {
   if (pars$taxon != "All") {
     data <- data %>% filter(taxon == pars$taxon)
   }
-  if (pars$year != "All") {
-    data <- data %>% filter(year_group == pars$year)
-  }
+  #if (pars$year != "All") {
+  #  data <- data %>% filter(year_group == pars$year)
+  #}
   if (pars$basis != "All") {
     data <- data %>% filter(basisOfRecord == pars$basis)
   }

@@ -48,7 +48,7 @@ soe_server <- function(input, output, session){
         z = input$z_map,
         map_type = input$map_spatial,
         taxon = input$taxon_map,
-        year = input$year_map,
+        #year = input$year_map,
         basis = input$basis_map,
         threat = input$threat_map,
         log_scale = input$log_map,
@@ -60,7 +60,7 @@ soe_server <- function(input, output, session){
         z = input$z_i_map,
         map_type = input$i_map_spatial,
         taxon = input$taxon_i_map,
-        year = input$year_i_map,
+        #year = input$year_i_map,
         basis = input$basis_i_map,
         threat = input$threat_i_map
         #log_scale = input$log_i_map,
@@ -80,9 +80,9 @@ soe_server <- function(input, output, session){
       variable_lookup$taxon <- "taxon"
     }
 
-    if (!is.null(current_vals$year) && current_vals$year != "All") {
-      variable_lookup$year_group <- "year_group"
-    }
+    #if (!is.null(current_vals$year) && current_vals$year != "All") {
+    #  variable_lookup$year_group <- "year_group"
+    #}
 
     if (!is.null(current_vals$basis) && current_vals$basis != "All") {
       variable_lookup$basisOfRecord <- "basisOfRecord"
