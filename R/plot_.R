@@ -14,7 +14,7 @@ plot_bar <- function(data, pars){
     data$australianStatesAndTerritories <-
       state_abb(data$australianStatesAndTerritories)
   }
-  y_var <- log_var(pars$y, pars$log_scale)
+  
   if(pars$color == "none"){
 
     # choose a colour
@@ -31,11 +31,11 @@ plot_bar <- function(data, pars){
     p <- ggplot(data,
       aes_string(
         x = pars$x, # colnames(data)[1],
-        y = y_var)) +
+        y = pars$y)) +
       geom_bar(stat = "identity", color = palette, fill = palette) +
       theme_bw() +
       labs(x = label_name(pars$x), y = label_name(pars$y, pars$log_scale)) +
-      bar_style() + scale_y_continuous(labels = comma)
+      bar_style() + scale_y_continuous(labels = comma, trans = scale_trans(pars$log_scale))
 
   }else{
 
@@ -62,7 +62,7 @@ plot_bar <- function(data, pars){
     p <- ggplot(data,
       aes_string(
         x = pars$x, # colnames(data)[1],
-        y = y_var,
+        y = pars$y,
         color = color,
         fill = color)) +
       geom_bar(stat = "identity", position = position_dodge()) +
@@ -73,7 +73,7 @@ plot_bar <- function(data, pars){
                         y = label_name(pars$y, pars$log_scale),
                         fill = label_name(pars$color),
                         color = label_name(pars$color)) +
-      bar_style() + scale_y_continuous(labels = comma)
+      bar_style() + scale_y_continuous(labels = comma, trans = scale_trans(pars$log_scale))
   }
 
   return(p)
@@ -87,26 +87,23 @@ plot_heatmap <- function(data, pars){
       state_abb(data$australianStatesAndTerritories)
   }
 
-  # set log scale
-  z_var <- log_var(pars$z, pars$log_scale)
-
   # set color direction
   palette_direction <- palette_dir(pars$color_reverse)
 
   if (pars$color_scheme == "ala") {
     scale_fill <- scale_fill_gradientn(colours = ala_pal(2, pars$color_reverse),
-                                       labels = comma)
+                                       labels = comma, trans = scale_trans(pars$log_scale))
   } else {
     scale_fill <- scale_fill_viridis(
       option = pars$color_scheme,
       direction = palette_direction,
-      labels = comma)
+      labels = comma, trans = scale_trans(pars$log_scale))
   }
   p <- ggplot(data,
     aes_string(
       x = pars$x, # colnames(data)[1],
       y = pars$y,
-      fill = z_var)) +
+      fill = pars$z)) +
     geom_tile() +
     scale_fill +
     theme_bw() + labs(x = label_name(pars$x),
@@ -121,8 +118,6 @@ plot_heatmap <- function(data, pars){
 }
 
 plot_map <- function(data, pars) {
-  
-  z_var <- log_var(pars$z, pars$log_scale)
 
   palette_direction <- palette_dir(pars$color_reverse)
   
@@ -130,15 +125,15 @@ plot_map <- function(data, pars) {
   
   if (pars$color_scheme == "ala") {
     scale_fill <- scale_fill_gradientn(colours = ala_pal(2, pars$color_reverse),
-                                       labels = comma)
+                                       labels = comma, trans = scale_trans(pars$log_scale))
   } else {
     scale_fill <- scale_fill_viridis(option = pars$color_scheme,
                                      direction = palette_direction,
-                                     labels = comma)
+                                     labels = comma, trans = scale_trans(pars$log_scale))
   }
   
   p <- ggplot(data) +
-    geom_sf(aes_string(fill = z_var), color = "grey50", size = 0.02) +
+    geom_sf(aes_string(fill = pars$z), color = "grey50", size = 0.02) +
     lims(x = c(110, 155), y = c(-45, -10)) +
     scale_fill +
     theme_bw() +
@@ -165,7 +160,6 @@ plot_i_map <- function(data, pars) {
   } else {
     title <- "Species Count"
   }
-  z_var <- pars$z
   #if(pars$log_scale){
   #  z_var <- paste0("log(", pars$z, ")")
   #}else{
@@ -177,22 +171,22 @@ plot_i_map <- function(data, pars) {
   colPalette <- "Reds" 
   colPal <- colorNumeric(
     palette = colPalette,
-    domain = data[[z_var]])
+    domain = data[[pars$z]])
   
   # Leaflet visualisation
   p <- leaflet(data = data) %>%
     setView(lng = 133.88362, lat = -23.69748, zoom = 4) %>%
     addTiles() %>%
-    addPolygons(fillColor = colPal(data[[z_var]]),
+    addPolygons(fillColor = colPal(data[[pars$z]]),
                 fillOpacity = .8, color = "#111111", weight = 1, stroke = TRUE,
                 highlightOptions = highlightOptions(color = "#222222", weight = 3,
                                                     bringToFront = TRUE),
-                label = build_labels(data, pars, z_var),
+                label = build_labels(data, pars),
                 labelOptions = labelOptions(
                   style = list("font-weight" = "normal", padding = "3px 5px"),
                   textsize = "12px",
                   direction = "auto")) %>%
-    addLegend("bottomright", pal = colPal, values = data[[z_var]],
+    addLegend("bottomright", pal = colPal, values = data[[pars$z]],
               title = title,
               opacity = 1)
   return(p)
@@ -211,9 +205,9 @@ label_name <- function(v, log = FALSE) {
          "national_parks" = "National Parks",
          "n_records" = "Record count",
          "n_spp" = "Species count")
-  if (log) {
-    name <- paste0("log(", name, ")")
-  }
+  #if (log) {
+  #  name <- paste0("log(", name, ")")
+  #}
   name
 }
 
@@ -233,13 +227,13 @@ state_abb <- function(states) {
 }
 
 # TODO: enable taxa and period-specific labels
-build_labels <- function(data, pars, z_var) {
+build_labels <- function(data, pars) {
   taxa <- pars$taxon
   period <- pars$year
   if (pars$map_type == "iBRA7Regions") {
     labels <- sprintf("<strong>%s</strong><br/>Code: %s<br/>ID: %g<br/>Area (km<sup>2</sup>): %g<br/><br/><strong>Taxa: %s</strong><br/>Period: %s<br/>Records Count: %g",
                       data$REG_NAME_7, data$REG_CODE_7, data$REC_ID, data$SQ_KM,
-                      taxa, period, data[[z_var]]) %>%
+                      taxa, period, data[[pars$z]]) %>%
       lapply(htmltools::HTML)
   } else if (pars$map_type == "IMCRA") {
     labels <- sprintf("<strong>%s</strong><br/>Code: %s<br/>ID: %g<br/>Area (km<sup>2</sup>): %g<br/><br/><strong>Taxa: %s</strong><br/>Records Count: %g",
@@ -287,11 +281,8 @@ palette_dir <- function(reverse) {
   palette_direction
 }
 
-log_var <- function(var, log_scale) {
-  if(log_scale){
-    var <- paste0("log(", var, ")")
-  }
-  return(var)
+scale_trans <- function(log_scale) {
+  if (log_scale) "log10" else "identity"
 }
 
 bar_style <- function() {
