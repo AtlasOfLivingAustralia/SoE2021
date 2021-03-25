@@ -231,11 +231,11 @@ state_abb <- function(states) {
 # TODO: enable taxa and period-specific labels
 build_labels <- function(data, pars) {
   taxa <- pars$taxon
-  period <- pars$year
+  threat_status <- pars$threat
   if (pars$map_type == "iBRA7Regions") {
-    labels <- sprintf("<strong>%s</strong><br/>Code: %s<br/>ID: %g<br/>Area (km<sup>2</sup>): %g<br/><br/><strong>Taxa: %s</strong><br/>Period: %s<br/>Records Count: %g",
+    labels <- sprintf("<strong>%s</strong><br/>Code: %s<br/>ID: %g<br/>Area (km<sup>2</sup>): %g<br/><br/><strong>Taxa: %s</strong><br/>Threat status: %s<br/>Records Count: %g",
                       data$REG_NAME_7, data$REG_CODE_7, data$REC_ID, data$SQ_KM,
-                      taxa, period, data[[pars$z]]) %>%
+                      taxa, threat_status, data[[pars$z]]) %>%
       lapply(htmltools::HTML)
   } else if (pars$map_type == "IMCRA") {
     labels <- sprintf("<strong>%s</strong><br/>Code: %s<br/>ID: %g<br/>Area (km<sup>2</sup>): %g<br/><br/><strong>Taxa: %s</strong><br/>Records Count: %g",
