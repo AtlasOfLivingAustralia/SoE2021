@@ -179,6 +179,39 @@ soe_server <- function(input, output, session){
       ggsave(file)
     }
   )
+  output$download_data_bar <- downloadHandler(
+    filename = function() {
+      paste("soe_data", ".csv", sep = "")
+    },
+    content = function(file) {
+      write.csv(df$current_data, file, row.names = FALSE)
+    }
+  )
+  output$download_data_map <- downloadHandler(
+    filename = function() {
+      paste("soe_data", ".csv", sep = "")
+    },
+    content = function(file) {
+      write.csv(df$current_data, file, row.names = FALSE)
+    }
+  )
+  output$download_data_i_map <- downloadHandler(
+    filename = function() {
+      paste("soe_data", ".csv", sep = "")
+    },
+    content = function(file) {
+      write.csv(df$current_data, file, row.names = FALSE)
+    }
+  )
+  output$download_data_heatmap <- downloadHandler(
+    filename = function() {
+      paste("soe_data", ".csv", sep = "")
+    },
+    content = function(file) {
+      write.csv(df$current_data, file, row.names = FALSE)
+    }
+  )
+  
 
   # save modal
   #observeEvent(input$download_modal, {

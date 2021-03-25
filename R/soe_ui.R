@@ -293,10 +293,17 @@ add_color_options <- function(suffix){
       value = FALSE),
     #actionButton(
     #  inputId = "download_modal",
-    #  label = "Download",
-    #  width = "100%")
+    #  label = "Download data",
+    #  width = "100%"),
     downloadButton(
-      outputId = paste0("download_", suffix)
+      outputId = paste0("download_", suffix),
+      label = "Download plot"
+    ),
+    br(),
+    br(),
+    downloadButton(
+      outputId = paste0("download_data_", suffix),
+      label = "Download data"
     )
   )
 }
