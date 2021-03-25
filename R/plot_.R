@@ -73,7 +73,9 @@ plot_bar <- function(data, pars){
                         y = label_name(pars$y, pars$log_scale),
                         fill = label_name(pars$color),
                         color = label_name(pars$color)) +
-      bar_style() + scale_y_continuous(labels = comma, trans = scale_trans(pars$log_scale))
+      bar_style() +
+      scale_y_continuous(labels = comma, trans = scale_trans(pars$log_scale)) +
+      legend_style()
   }
 
   return(p)
@@ -109,7 +111,7 @@ plot_heatmap <- function(data, pars){
     theme_bw() + labs(x = label_name(pars$x),
                       y = label_name(pars$y),
                       fill = label_name(pars$z, pars$log_scale)) +
-    axes_style()
+    axes_style() + legend_style()
   if (pars$facet != "none") {
     p <- p + facet_wrap(as.formula(paste("~", pars$facet)))
   }
@@ -145,7 +147,7 @@ plot_map <- function(data, pars) {
       axis.ticks = element_blank(),
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank()
-    )
+    ) + legend_style()
   
   if (pars$facet != "none") {
     p <- p + facet_wrap(as.formula(paste("~", pars$facet)))
@@ -291,7 +293,14 @@ bar_style <- function() {
 
 axes_style <- function() {
   theme(
-    axis.title = element_text(family = "Roboto"),
-    axis.text = element_text(family = "Roboto")
+    axis.title = element_text(family = "Roboto", size = 14),
+    axis.text = element_text(family = "Roboto", size = 14)
+  )
+}
+
+legend_style <- function() {
+  theme(
+    legend.text = element_text(size = 12),
+    legend.title = element_text(size = 12)
   )
 }
