@@ -73,7 +73,7 @@ plot_bar <- function(data, pars){
                         y = label_name(pars$y, pars$log_scale),
                         fill = label_name(pars$color),
                         color = label_name(pars$color)) +
-      bar_style()
+      bar_style() + scale_y_continuous(labels = comma)
   }
 
   return(p)
