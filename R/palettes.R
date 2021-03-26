@@ -44,7 +44,9 @@ ala_palettes <- list(
 ala_pal <- function(ncol, reverse = FALSE) {
   pal <- ala_palettes[[as.character(ncol)]]
   if (is.null(pal)) {
-    warning("No palette available for ", ncol, "colours")
+    message("No palette available for ", ncol, "colours, defaulting to a gradient color scheme.")
+    pal_fn <- colorRampPalette(c(ala_cols("flamingo"), ala_cols("silver")))
+    pal <- pal_fn(ncol)
   }
   names(pal) <- NULL
   if (reverse) {
