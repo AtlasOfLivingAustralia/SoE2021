@@ -100,7 +100,7 @@ soe_server <- function(input, output, session){
     )))
     if (length(df$lookup) == 0) {
       showModal(modalDialog(
-        "This combination of filters is not currently available.",
+        "This combination of facets is not currently available.",
         easyClose = TRUE
       ))
       return()
@@ -164,7 +164,7 @@ soe_server <- function(input, output, session){
   output$download_map <- downloadHandler(
     filename = "map_plot.png",
     content = function(file) {
-      ggsave(file)
+      ggsave(file, width = 20, height = 15)
     }
   )
   output$download_i_map <- downloadHandler(
