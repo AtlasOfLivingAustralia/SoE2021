@@ -69,7 +69,7 @@ soe_server <- function(input, output, session){
     )
 
     df$current_values <- current_vals
-
+    
     variable_lookup <- switch(input$tabs,
       "bar" = {current_vals[c("x", "color")]},
       "heatmap" = {current_vals[c("x", "y", "facet")]}, # "facet"
@@ -98,7 +98,13 @@ soe_server <- function(input, output, session){
       function(a, x){all(a %in% x) & length(a) == length(x)},
       x = unlist(unique(variable_lookup[variable_lookup != "none"]))
     )))
-
+    if (length(df$lookup) == 0) {
+      showModal(modalDialog(
+        "This combination of filters is not currently available.",
+        easyClose = TRUE
+      ))
+      return()
+    }
     # save to 'current_data'
     df$current_data <- data_list[[df$lookup]]
 
@@ -167,16 +173,17 @@ soe_server <- function(input, output, session){
       mapshot(df$plot_i_map, file = "i_map_plot.png")
     }
   )
+  
   output$download_bar <- downloadHandler(
     filename = "bar_plot.png",
     content = function(file) {
-      ggsave(file)
+      ggsave(file, width = 20, height = 15)
     }
   )
   output$download_heatmap <- downloadHandler(
     filename = "heatmap_plot.png",
     content = function(file) {
-      ggsave(file)
+      ggsave(file, width = 20, height = 15)
     }
   )
   output$download_data_bar <- downloadHandler(
