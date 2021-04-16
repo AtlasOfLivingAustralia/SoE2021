@@ -4,7 +4,7 @@
 \alias{build_soe_app}
 \title{Build a shiny app for visualising ALA data}
 \usage{
-build_soe_app(name = "test_app", launch = TRUE)
+build_soe_app(name = "soe_app", launch = TRUE)
 }
 \description{
 This function builds an app in the users' workspace
