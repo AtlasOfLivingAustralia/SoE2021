@@ -161,90 +161,13 @@ soe_server <- function(input, output, session){
   })
 
   # Download plot- ugly but works
-  output$download_map <- downloadHandler(
-    filename = "map_plot.png",
-    content = function(file) {
-      ggsave(file, width = 20, height = 15)
-    }
-  )
-  output$download_i_map <- downloadHandler(
-    filename = "i_map_plot.png",
-    content = function(file) {
-      mapshot(df$plot_i_map, file = "i_map_plot.png")
-    }
-  )
+  output$download_map <- download_plot("map")
+  output$download_i_map <- download_plot("i_map")
+  output$download_heatmap <- download_plot("heatmap")
+  output$download_bar <- download_plot("bar")
   
-  output$download_bar <- downloadHandler(
-    filename = "bar_plot.png",
-    content = function(file) {
-      ggsave(file, width = 20, height = 15)
-    }
-  )
-  output$download_heatmap <- downloadHandler(
-    filename = "heatmap_plot.png",
-    content = function(file) {
-      ggsave(file, width = 20, height = 15)
-    }
-  )
-  output$download_data_bar <- downloadHandler(
-    filename = function() {
-      paste("soe_data", ".csv", sep = "")
-    },
-    content = function(file) {
-      write.csv(df$current_data, file, row.names = FALSE)
-    }
-  )
-  output$download_data_map <- downloadHandler(
-    filename = function() {
-      paste("soe_data", ".csv", sep = "")
-    },
-    content = function(file) {
-      write.csv(df$current_data, file, row.names = FALSE)
-    }
-  )
-  output$download_data_i_map <- downloadHandler(
-    filename = function() {
-      paste("soe_data", ".csv", sep = "")
-    },
-    content = function(file) {
-      write.csv(df$current_data, file, row.names = FALSE)
-    }
-  )
-  output$download_data_heatmap <- downloadHandler(
-    filename = function() {
-      paste("soe_data", ".csv", sep = "")
-    },
-    content = function(file) {
-      write.csv(df$current_data, file, row.names = FALSE)
-    }
-  )
-  
-
-  # save modal
-  #observeEvent(input$download_modal, {
-  #  save_modal()
-  #})
-
-  # when 'save' is hit, save the file as requested
-  #observeEvent(input$save_data_execute, {
-  #  ggsave(
-  #    filename = paste(
-  #      input$save_filename,
-  #      tolower(input$save_type),
-  #      sep = "."),
-  #    plot = df$plot,
-  #    device = tolower(input$save_type)
-  #  )
-    ## note that the above saves to the app directory
-    ## a better choice is to use a download handler:
-    # downloadHandler(
-    #   filename = paste(
-    #     input$save_filename,
-    #     input$save_type,
-    #     collapse = "."
-    #   ),
-    #   content = function()
-    # )
-  #})
-
+  output$download_data_bar <- download_data(df$current_data)
+  output$download_data_map <- download_data(df$current_data)
+  output$download_data_i_map <- download_data(df$current_data)
+  output$download_data_heatmap <- download_data(df$current_data)
 }
