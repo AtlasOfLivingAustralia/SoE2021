@@ -1,6 +1,12 @@
+#' draw plots within shiny
+#'
+#' Internal functions called by SoE app
+#'
 #' @importFrom viridisLite viridis
 #' @import ozmaps
 #' @importFrom dplyr inner_join filter
+#' @importFrom ggplot2 ggplot geom_sf lims theme_bw aes
+#' @importFrom viridis scale_fill_viridis
 #' @importFrom scales comma
 
 plot_bar <- function(data, pars){
@@ -9,12 +15,12 @@ plot_bar <- function(data, pars){
   # data_tr[[pars$x]] <- factor(data_tr[[pars$x]],
   #   levels = seq_along(unique(data_tr))[[pars$x]],
   #   labels = data_tr[[pars$x]])
-  
+
   if (pars$x == "australianStatesAndTerritories") {
     data$australianStatesAndTerritories <-
       state_abb(data$australianStatesAndTerritories)
   }
-  
+
   if(pars$color == "none"){
 
     # choose a colour
@@ -26,7 +32,7 @@ plot_bar <- function(data, pars){
         option = pars$color_scheme,
         begin = 0.5)
     }
-    
+
     # draw
     p <- ggplot(data,
       aes_string(
@@ -45,8 +51,8 @@ plot_bar <- function(data, pars){
     # set palette etc
     color <- pars$color
     color_n <- length(unique(data[[pars$color]]))
-    
-    
+
+
     if (pars$color_scheme == "ala") {
       palette <- ala_pal(color_n, reverse = pars$color_reverse)
     } else {
@@ -57,7 +63,7 @@ plot_bar <- function(data, pars){
         begin = 0.1,
         end = 0.9)
     }
-    
+
     # draw
     p <- ggplot(data,
       aes_string(
@@ -122,9 +128,9 @@ plot_heatmap <- function(data, pars){
 plot_map <- function(data, pars) {
 
   palette_direction <- palette_dir(pars$color_reverse)
-  
+
   data <- build_map_data(data, pars)
-  
+
   if (pars$color_scheme == "ala") {
     scale_fill <- scale_fill_gradientn(colours = ala_pal(2, pars$color_reverse),
                                        labels = comma, trans = scale_trans(pars$log_scale))
@@ -133,7 +139,7 @@ plot_map <- function(data, pars) {
                                      direction = palette_direction,
                                      labels = comma, trans = scale_trans(pars$log_scale))
   }
-  
+
   p <- ggplot(data) +
     geom_sf(aes_string(fill = pars$z), color = "grey50", size = 0.02) +
     lims(x = c(110, 155), y = c(-45, -10)) +
@@ -148,7 +154,7 @@ plot_map <- function(data, pars) {
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank()
     ) + legend_style()
-  
+
   if (pars$facet != "none") {
     p <- p + facet_wrap(as.formula(paste("~", pars$facet)))
   }
@@ -167,14 +173,14 @@ plot_i_map <- function(data, pars) {
   #}else{
   #  z_var <- pars$z
   #}
-  
+
   data <- build_map_data(data, pars)
-  
-  colPalette <- "Reds" 
+
+  colPalette <- "Reds"
   colPal <- colorNumeric(
     palette = colPalette,
     domain = data[[pars$z]])
-  
+
   # Leaflet visualisation
   p <- leaflet(data = data) %>%
     setView(lng = 133.88362, lat = -23.69748, zoom = 4) %>%
@@ -215,7 +221,7 @@ label_name <- function(v, log = FALSE) {
 
 state_abb <- function(states) {
   abbs <- unlist(lapply(states, function(s) {
-    switch(s, 
+    switch(s,
            "Australian Capital Territory" = "ACT",
            "Queensland" = "QLD",
            "Victoria" = "VIC",
@@ -246,7 +252,7 @@ build_labels <- function(data, pars) {
                       data$NAME, data$RES_NUMBER, data$PA_ID, data$GIS_AREA, taxa, data$z_var) %>%
       lapply(htmltools::HTML)
   } else {
-    print('Not a valid region name.')  
+    print('Not a valid region name.')
   }
 }
 
@@ -263,7 +269,7 @@ build_map_data <- function(data, pars) {
   if (pars$threat != "All") {
     data <- data %>% filter(threat_status == pars$threat)
   }
-  
+
   if (pars$map_type == "australianStatesAndTerritories") {
     data <- inner_join(ozmaps::ozmap_states, data,
                        by = c("NAME" = "australianStatesAndTerritories"))
@@ -303,4 +309,15 @@ legend_style <- function() {
     legend.text = element_text(size = 12),
     legend.title = element_text(size = 12)
   )
+}
+
+log_fun <- function(x, log){
+  if(log){log(x + 1)}else{x}
+}
+
+leg_title <- function(type, log) {
+  if (type == "record"){ type <- "records"}
+  txt <- paste0("Number of ", type)
+  if (log) { txt <- paste0("Log(", txt, ")")}
+  txt
 }
