@@ -151,6 +151,7 @@ build_epbc_df <- function(){
 }
 
 build_griis_df <- function(){
+  # Test comment
   griss_list <- read.csv("./SoE2021/inst/extdata/OverallInvList_Up.csv")
   # clean the list
   griss_list <- griss_list[
