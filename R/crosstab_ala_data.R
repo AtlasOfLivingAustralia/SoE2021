@@ -24,6 +24,9 @@ crosstab_ala_data.table <- function(files){
       paste0(a, "/", all_files[grepl("^data", all_files)]))
   }))
 
+  # IF data are stored in an rds file
+  # data_in <- readRDS("./cache/alldata.rds")
+
   # import
   data_list <- lapply(all_files, function(a){data.table::fread(file = a)})
   data_in <- data.table::rbindlist(data_list)
@@ -80,7 +83,7 @@ crosstab_ala_data.table <- function(files){
       if(any(combn_tr == "year_group")){
         included_vars <- c(included_vars, "year")
       }
-      if(any(combn_tr == "threat_status")){
+      if(any(combn_tr %in% c("threat_status", "griis_status"))){
         included_vars <- c(included_vars, "species_guid")
       }
       if(any(combn_tr == "taxon")){
@@ -145,6 +148,15 @@ build_epbc_df <- function(){
   # threated_list[which(unlist(lapply(threated_list, nrow)) > 1)]
   threatened_df <- do.call(rbind, lapply(threated_list, function(a){a[1, ]}))
   save(threatened_df, file = "./SoE2021/data/threatened_df.RData")
+}
+
+build_griis_df <- function(){
+  griss_list <- read.csv("./SoE2021/inst/extdata/OverallInvList_Up.csv")
+  # clean the list
+  griss_list <- griss_list[
+    griss_list$match_type == "exactMatch" & griss_list$issues == "noIssue", ]
+  griss_list <- griss_list[!is.na(griss_list$taxon_concept_id), ]
+  save(griss_list, file = "./SoE2021/data/griss_df.RData")
 }
 
 # Then for Weeds of National Significance (WONS)
