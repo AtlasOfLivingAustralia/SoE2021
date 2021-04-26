@@ -134,16 +134,11 @@ add_year_group <- function(df){
 }
 
 add_griis_status <- function(df) {
-  
   df$order <- seq_len(nrow(df))
-  
   data_out <- merge(df, griis_df, by.y = "taxon_concept_id", by.x = "species_guid", all.x = TRUE)
-  
-  data_out <- data_out[order(data_out$order.x), ] # NOTE: this hasn't been checked
-
+  data_out <- data_out[order(data_out$order.x), ]
   return(data_out$isInvasive)
-  
-  }
+}
 
 
 # by taxonomic group (pretty arbitrary categories)
@@ -296,7 +291,7 @@ crosstab_ala_data.table <- function(files){
   # get all combinations
   combination_list <- do.call(c,
     lapply(
-      seq_len(4), # maximum number of combinations
+      seq_len(5), # maximum number of combinations
       # seq_along(crosstab_columns),
       function(a){combn(crosstab_columns, a, simplify = FALSE)}))
 
@@ -304,9 +299,12 @@ crosstab_ala_data.table <- function(files){
   combination_list <- combination_list[
     !unlist(lapply(combination_list, function(a){
       all(
-        c("australianStatesAndTerritories", "iBRA7Regions") %in% a)
+        c("australianStatesAndTerritories", "iBRA7Regions") %in% a
+        ) ||
+      all(
+        c("griis_status", "threat_status") %in% a
+      )
     }))]
-
 
   # now create list of combinations that we can populate with data
   data_list <- as.list(rep(NA, length(combination_list)))
