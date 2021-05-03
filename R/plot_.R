@@ -269,6 +269,10 @@ build_map_data <- function(data, pars) {
   if (pars$threat != "All") {
     data <- data %>% filter(threat_status == pars$threat)
   }
+  
+  if (pars$griis != "All") {
+    data <- data %>% filter(griis_status == pars$griis)
+  }
 
   if (pars$map_type == "australianStatesAndTerritories") {
     data <- inner_join(ozmaps::ozmap_states, data,

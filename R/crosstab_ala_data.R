@@ -24,6 +24,9 @@ crosstab_ala_data.table <- function(files){
       paste0(a, "/", all_files[grepl("^data", all_files)]))
   }))
 
+  # IF data are stored in an rds file
+  # data_in <- readRDS("./cache/alldata.rds")
+
   # import
   data_list <- lapply(all_files, function(a){data.table::fread(file = a)})
   data_in <- data.table::rbindlist(data_list)
@@ -52,7 +55,8 @@ crosstab_ala_data.table <- function(files){
     "threat_status",
     "australianStatesAndTerritories",
     "iBRA7Regions",
-    "national_parks")
+    "national_parks",
+    "griis_status")
 
   # get all combinations
   combination_list <- do.call(c,
@@ -80,7 +84,7 @@ crosstab_ala_data.table <- function(files){
       if(any(combn_tr == "year_group")){
         included_vars <- c(included_vars, "year")
       }
-      if(any(combn_tr == "threat_status")){
+      if(any(combn_tr %in% c("threat_status", "griis_status"))){
         included_vars <- c(included_vars, "species_guid")
       }
       if(any(combn_tr == "taxon")){
@@ -141,11 +145,12 @@ build_epbc_df <- function(){
     all = FALSE)
 
   # length(unique(threatened_list$taxon_concept_id)) == nrow(threatened_list)
-  threated_list <- split(threatened_df, threatened_df$taxon_concept_id)
-  # threated_list[which(unlist(lapply(threated_list, nrow)) > 1)]
-  threatened_df <- do.call(rbind, lapply(threated_list, function(a){a[1, ]}))
+  threatened_list <- split(threatened_df, threatened_df$taxon_concept_id)
+  # threatened_list[which(unlist(lapply(threatened_list, nrow)) > 1)]
+  threatened_df <- do.call(rbind, lapply(threatened_list, function(a){a[1, ]}))
   save(threatened_df, file = "./SoE2021/data/threatened_df.RData")
 }
+
 
 # Then for Weeds of National Significance (WONS)
 build_wons_df <- function(){
@@ -168,8 +173,34 @@ build_threats_df <- function(epbc, wons) {
   save(all_threats_df, file = "./SoE2021/data/all_threats_df.RData")
 }
 
-
 # ADD FUNCTIONS FOR ALA DATA
+# For GRIIS list
+# For GRIIS list
+build_griis_df <- function(){
+  griis_list <- read.csv(
+    "./SoE2021/inst/extdata/GRIIS_Aus.csv")
+  griis_ala_original <- select_taxa(griis_list$species)
+  griis_ala <- griis_ala_original %>%
+    filter(match_type == "exactMatch", issues == "noIssue")
+  
+  griis_ala <- griis_ala[!is.na(griis_ala$species), ]
+  griis_df <- merge(griis_list,
+                    griis_ala[, c("search_term", "taxon_concept_id")],
+                    by.x = "species", by.y = "search_term",
+                    all = FALSE)
+  
+  # length(unique(threatened_list$taxon_concept_id)) == nrow(threatened_list)
+  griis_list <- split(griis_df, griis_df$taxon_concept_id)
+  # threatened_list[which(unlist(lapply(threatened_list, nrow)) > 1)]
+  griis_df <- do.call(rbind, lapply(griis_list, function(a){a[1, ]}))
+  
+  griis_df <- griis_df %>%
+    mutate(isInvasive = ifelse(isInvasive == "NULL", "introduced", "invasive"))
+  
+  save(griis_df, file = "./SoE2021/data/griis_df.RData")
+}
+
+
 # Sub-functions to support cross-tabulation by various categories
 
 # group data by year
@@ -181,6 +212,7 @@ add_year_group <- function(df){
     sep = "-")
   return(var_factor)
 }
+
 
 # by taxonomic group (pretty arbitrary categories)
 add_taxon <- function(df){
@@ -263,5 +295,139 @@ add_required_cols <- function(df, combns){
   if(any(combns == "threat_status")){
     df$threat_status <- add_threat_status(df)
   }
+  if(any(combns == "griis_status")){
+    df$griis_status <- add_griis_status(df)
+  }
   return(df)
+}
+
+# files <- paste0("./cache/",
+#   c("ACT", "NSW", "NT", "QLD", "SA", "TAS", "VIC", "WA"),
+#   ".rds")
+
+crosstab_ala_data.table <- function(files){
+
+  # get zip files
+  cache_dir <- "./cache"
+  cached_files <- list.files(cache_dir)
+  cached_files <- cached_files[grepl(".zip$", cached_files)]
+  cached_df <- data.frame(
+    source = paste0(cache_dir, "/", cached_files),
+    out = paste0(cache_dir, "/", gsub(".zip", "", cached_files)))
+  # below section only needs to be run once, to unzip your files
+  # invisible(lapply(
+  #   split(cached_df, seq_len(nrow(cached_df))),
+  #   function(a){unzip(a$source, exdir = a$out)}))
+
+  # detect all files named some variant of 'data.csv'
+  all_files <- unlist(lapply(cached_df$out, function(a){
+    all_files <- list.files(a)
+    return(
+      paste0(a, "/", all_files[grepl("^data", all_files)]))
+  }))
+
+  # import
+  data_list <- lapply(all_files, function(a){data.table::fread(file = a)})
+  data_in <- data.table::rbindlist(data_list)
+  colnames(data_in)[7:9] <- c(
+    "australianStatesAndTerritories",
+    "iBRA7Regions",
+    "CAPAD2016Terrestrial")
+
+  # saveRDS(data_in, "./cache/alldata.rds")
+  # data_in <- readRDS("./cache/alldata.rds")
+
+  # set up national park information
+  national_park_logical <- data_in$CAPAD2016Terrestrial != ""
+  national_park_numeric <- as.numeric(national_park_logical) + 1
+  national_park_factor <- factor(
+    national_park_numeric,
+    levels = seq_len(2),
+    labels = c("Other land use", "National Park"))
+  data_in$national_parks <- national_park_factor
+
+  # work out required combinations of variables
+  crosstab_columns <- c(
+    "year_group",
+    "taxon",
+    "basisOfRecord",
+    "threat_status",
+    "australianStatesAndTerritories",
+    "iBRA7Regions",
+    "national_parks",
+    "griis_status")
+
+  # get all combinations
+  combination_list <- do.call(c,
+    lapply(
+      seq_len(4), # maximum number of combinations
+      # seq_along(crosstab_columns),
+      function(a){combn(crosstab_columns, a, simplify = FALSE)}))
+
+  # we never need to combine states and IBRA regions - remove pairs with these attributes
+  combination_list <- combination_list[
+    !unlist(lapply(combination_list, function(a){
+      all(
+        c("australianStatesAndTerritories", "iBRA7Regions") %in% a) ||
+      all(
+        c("griis_status", "threat_status") %in% a
+      )
+    }))]
+
+
+  # now create list of combinations that we can populate with data
+  data_list <- as.list(rep(NA, length(combination_list)))
+  exceptions_group <- c("year_group", "threat_status", "taxon", "griis_status")
+
+  for(a in seq_along(data_list)){
+    combn_tr <- combination_list[[a]]
+    if(any(combn_tr %in% exceptions_group)){
+      included_vars <- combn_tr[!(combn_tr %in% exceptions_group)]
+      if(any(combn_tr == "year_group")){
+        included_vars <- c(included_vars, "year")
+      }
+      if(any(combn_tr == "threat_status", combn_tr == "griis_status")){
+        included_vars <- c(included_vars, "species_guid")
+      }
+      if(any(combn_tr == "taxon")){
+        included_vars <- c(included_vars, "kingdom", "phylum", "class")
+      }
+    }else{
+      included_vars <- combn_tr
+    }
+
+    # use included_vars to crosstab
+    xtab1 <- add_required_cols(
+      # count by each of the included variables
+      data_in[, .(.N), keyby = included_vars],
+      combn_tr)
+    xtab_final <- xtab1[, .(sum(N)), keyby = combn_tr]
+    colnames(xtab_final)[length(combn_tr) + 1] <- "n_records"
+
+    # get information by species
+    if(any(included_vars == "species_guid")){
+      xtab_species <- xtab1
+    }else{
+      xtab_species <- add_required_cols(
+        data_in[, .(.N), keyby = c(included_vars, "species_guid")],
+        combn_tr)
+    }
+    xtab_species_count <- xtab_species[
+      (species_guid != ""),
+      .(.N),
+      keyby = combn_tr]
+
+    colnames(xtab_species_count)[length(combn_tr) + 1] <- "n_species"
+    result <- merge(xtab_final, xtab_species_count)
+    data_list[[a]] <- result
+    cat(paste0("Run ", a, " complete: ", Sys.time(), "\n"))
+
+} # end loop
+
+  names(data_list) <- unlist(lapply(
+    combination_list,
+    function(a){paste(a, collapse = "::")}))
+
+  # last stage is to export xtab list and a corresponding index data.frame
+  save(data_list, file = "./SoE2021/data/data_list.RData")
 }

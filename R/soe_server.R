@@ -51,6 +51,7 @@ soe_server <- function(input, output, session){
         #year = input$year_map,
         basis = input$basis_map,
         threat = input$threat_map,
+        griis = input$griis_map,
         log_scale = input$log_map,
         color_scheme = input$color_scheme_map,
         color_reverse = input$color_reverse_map,
@@ -62,7 +63,8 @@ soe_server <- function(input, output, session){
         taxon = input$taxon_i_map,
         #year = input$year_i_map,
         basis = input$basis_i_map,
-        threat = input$threat_i_map
+        threat = input$threat_i_map,
+        griis = input$griis_i_map
         #log_scale = input$log_i_map,
       )
       }
@@ -88,8 +90,11 @@ soe_server <- function(input, output, session){
       variable_lookup$basisOfRecord <- "basisOfRecord"
     }
     
-    if (!is.null(current_vals$basis) && current_vals$threat != "All") {
+    if (!is.null(current_vals$threat) && current_vals$threat != "All") {
       variable_lookup$threat_status <- "threat_status"
+    }
+    if (!is.null(current_vals$griis) && current_vals$griis != "All") {
+      variable_lookup$griis_status <- "griis_status"
     }
 
     # determine which entry from xtab_list contains the requisite data

@@ -148,7 +148,8 @@ category_dropdown <- function(inputId, label, selected, include_none = FALSE){
     "Basis of Record" = "basisOfRecord",
     "States" = "australianStatesAndTerritories",
     "IBRA Regions" = "iBRA7Regions",
-    "National Parks" = "national_parks")
+    "National Parks" = "national_parks",
+    "GRIIS Status" = "griis_status")
   if(include_none){
     choices <- c("None" = "none", choices_default)
   }else{
@@ -177,7 +178,8 @@ map_dropdowns <- function(suffix) {
     taxon_dropdown(suffix),
     #year_dropdown(suffix),
     basis_dropdown(suffix),
-    threat_dropdown(suffix)
+    threat_dropdown(suffix),
+    griis_dropdown(suffix)
   )
 }
 
@@ -255,6 +257,19 @@ threat_dropdown <- function(suffix) {
       "Extinct in the wild",
       "Extinct",
       "Weed of National Significance"
+    )
+  )
+}
+
+griis_dropdown <- function(suffix) {
+  selectInput(
+    inputId = paste0("griis_", suffix),
+    label = "GRIIS Status:",
+    choices = c(
+      "All",
+      "Invasive" = "invasive",
+      "Introduced" = "introduced",
+      "Neither" = NA
     )
   )
 }
