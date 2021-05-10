@@ -8,7 +8,6 @@ Description: Build shiny app for visualising ALA data
 Imports:
   shiny,
   bslib,
-  galah,
   sf,
   ggplot2,
   viridis
